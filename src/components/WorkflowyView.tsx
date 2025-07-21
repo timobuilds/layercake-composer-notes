@@ -131,6 +131,18 @@ const WorkflowyItem = ({
             data-node-id={node.id}
             style={{ paddingLeft: `${indentLevel + 8}px` }}
           >
+            {/* Three dots menu - only visible on hover */}
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0 hover:bg-accent"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </div>
+
             {/* Bullet/Toggle */}
             <div className="flex items-center gap-1 flex-shrink-0">
               {hasChildren && (
@@ -184,18 +196,6 @@ const WorkflowyItem = ({
                   )}
                 </div>
               )}
-            </div>
-
-            {/* Three dots menu - only visible on hover */}
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0 hover:bg-accent"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
             </div>
           </div>
         </ContextMenuTrigger>
