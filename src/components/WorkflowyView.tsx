@@ -625,15 +625,28 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
       </div>
 
       {/* Add new item */}
-      <div className="mt-4 ml-2">
-        <Button
-          variant="ghost"
-          onClick={handleAddNew}
-          className="text-sm text-muted-foreground hover:text-foreground h-8 px-2"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add new item
-        </Button>
+      <div className="mt-4" style={{ paddingLeft: '8px' }}>
+        <div className="flex items-center gap-2 py-1 hover:bg-muted/30 rounded group cursor-pointer">
+          <div className="opacity-0 flex-shrink-0 w-6"></div> {/* Space for three dots menu */}
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <Button
+              variant="ghost"
+              onClick={handleAddNew}
+              className="p-0 h-4 w-4 hover:bg-muted rounded flex items-center justify-center"
+            >
+              <Plus className="h-3 w-3 text-muted-foreground" />
+            </Button>
+          </div>
+          <div className="flex-1 min-w-0">
+            <Button
+              variant="ghost"
+              onClick={handleAddNew}
+              className="text-sm text-muted-foreground hover:text-foreground h-6 px-0 py-0 justify-start"
+            >
+              Add new item
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
