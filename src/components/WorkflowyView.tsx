@@ -120,7 +120,7 @@ const WorkflowyItem = ({
         data-node-id={node.id}
       >
         {/* Bullet/Toggle */}
-        <div className="flex items-center gap-1 mt-1">
+        <div className="flex items-center gap-1">
           {hasChildren && (
             <button
               onClick={(e) => {
@@ -263,8 +263,12 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
       setNodes(rootNodes);
       setBreadcrumbs([]);
     }
+  }, [projectId, focusedNodeId]);
+
+  // Separate effect to call onNodesChange to avoid infinite loop
+  useEffect(() => {
     onNodesChange();
-  }, [projectId, focusedNodeId, onNodesChange]);
+  }, [nodes, onNodesChange]);
 
   useEffect(() => {
     loadNodes();
