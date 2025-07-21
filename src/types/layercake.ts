@@ -21,6 +21,8 @@ export interface Node {
   parentId: string | null;
   title?: string; // Optional title for root nodes
   content: string;
+  completed?: boolean; // For marking items as done
+  collapsed?: boolean; // For collapsing branches
   createdAt: string;
 }
 

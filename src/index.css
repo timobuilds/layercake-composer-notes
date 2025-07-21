@@ -151,4 +151,17 @@
   .prose blockquote {
     @apply border-l-4 border-primary/30 pl-4 italic text-muted-foreground;
   }
+
+  /* Workflowy-specific styles */
+  .workflowy-container {
+    @apply text-xs;
+  }
+
+  .workflowy-item:hover {
+    @apply bg-muted/20;
+  }
+
+  .workflowy-item .workflowy-children {
+    @apply border-l border-border/30 ml-2 pl-4;
+  }
 }

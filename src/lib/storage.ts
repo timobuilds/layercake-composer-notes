@@ -55,8 +55,22 @@ export const storage = {
 
   deleteNode(id: string): void {
     const nodes = this.getNodes();
-    const filtered = nodes.filter(n => n.id !== id && n.parentId !== id);
+    // Delete the node and all its descendants recursively
+    const deleteNodeAndDescendants = (nodeId: string) => {
+      const children = nodes.filter(n => n.parentId === nodeId);
+      children.forEach(child => deleteNodeAndDescendants(child.id));
+    };
+    
+    deleteNodeAndDescendants(id);
+    const filtered = nodes.filter(n => n.id !== id && !this.isDescendantOf(n.id, id, nodes));
     this.saveNodes(filtered);
+  },
+
+  isDescendantOf(nodeId: string, ancestorId: string, allNodes: Node[]): boolean {
+    const node = allNodes.find(n => n.id === nodeId);
+    if (!node || !node.parentId) return false;
+    if (node.parentId === ancestorId) return true;
+    return this.isDescendantOf(node.parentId, ancestorId, allNodes);
   },
 
   getProjectNodes(projectId: string): Node[] {

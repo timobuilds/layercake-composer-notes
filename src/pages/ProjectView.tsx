@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { NodeTree } from '@/components/NodeTree';
+import { WorkflowyView } from '@/components/WorkflowyView';
 import { CreateVersionDialog } from '@/components/CreateVersionDialog';
 import { VersionHistoryDialog } from '@/components/VersionHistoryDialog';
 import { storage, generateId } from '@/lib/storage';
@@ -15,6 +16,7 @@ export const ProjectView = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const [project, setProject] = useState<Project | null>(null);
   const [nodes, setNodes] = useState<Node[]>([]);
+  const [viewMode, setViewMode] = useState<'workflowy' | 'tree'>('workflowy');
   const [isAddingRoot, setIsAddingRoot] = useState(false);
   const [newRootContent, setNewRootContent] = useState('');
   const [newRootTitle, setNewRootTitle] = useState('');
@@ -99,6 +101,22 @@ export const ProjectView = () => {
             </div>
             
             <div className="flex gap-2">
+              <Button
+                variant={viewMode === 'workflowy' ? 'default' : 'outline'}
+                onClick={() => setViewMode('workflowy')}
+                size="sm"
+                className="text-xs"
+              >
+                Workflowy
+              </Button>
+              <Button
+                variant={viewMode === 'tree' ? 'default' : 'outline'}
+                onClick={() => setViewMode('tree')}
+                size="sm"
+                className="text-xs"
+              >
+                Tree
+              </Button>
               <CreateVersionDialog 
                 projectId={projectId!} 
                 onVersionCreated={handleVersionCreated}
@@ -107,20 +125,22 @@ export const ProjectView = () => {
                 projectId={projectId!} 
                 onVersionRestored={loadNodes}
               />
-              <Button
-                onClick={() => setIsAddingRoot(true)}
-                size="sm"
-                className="text-xs"
-              >
-                <Plus className="h-3 w-3 mr-1" />
-                Add Node
-              </Button>
+              {viewMode === 'tree' && (
+                <Button
+                  onClick={() => setIsAddingRoot(true)}
+                  size="sm"
+                  className="text-xs"
+                >
+                  <Plus className="h-3 w-3 mr-1" />
+                  Add Node
+                </Button>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Add Root Node Form */}
-        {isAddingRoot && (
+        {/* Add Root Node Form - Only for Tree View */}
+        {isAddingRoot && viewMode === 'tree' && (
           <Card className="mb-4">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm">
@@ -163,8 +183,13 @@ export const ProjectView = () => {
           </Card>
         )}
 
-        {/* Nodes */}
-        {nodes.length > 0 ? (
+        {/* Content */}
+        {viewMode === 'workflowy' ? (
+          <WorkflowyView
+            projectId={projectId!}
+            onNodesChange={loadNodes}
+          />
+        ) : nodes.length > 0 ? (
           <div className="space-y-3">
             <NodeTree
               nodes={nodes}
