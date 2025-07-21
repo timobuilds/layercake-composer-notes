@@ -18,7 +18,7 @@ export const Home = () => {
 
   return (
     <div className="min-h-screen bg-background flex justify-center">
-      <div className="w-[700px] px-4 py-6">
+      <div className="w-[600px] px-4 py-6">
         {/* Header */}
         <div className="border-b border-border pb-4 mb-6">
           <div className="flex items-center justify-between">

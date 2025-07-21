@@ -19,6 +19,7 @@ export interface Node {
   id: string;
   projectId: string;
   parentId: string | null;
+  title?: string; // Optional title for root nodes
   content: string;
   createdAt: string;
 }

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Node } from '@/types/layercake';
 import { storage, generateId } from '@/lib/storage';
-import { Plus, Edit3, Save, X, ChevronRight, ChevronDown } from 'lucide-react';
+import { Plus, Edit3, Save, X, ChevronRight, ChevronDown, Type } from 'lucide-react';
 
 interface NodeTreeProps {
   nodes: Node[];
@@ -24,15 +25,20 @@ interface NodeItemProps {
 const NodeItem = ({ node, projectId, level, onNodesChange }: NodeItemProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(node.content);
+  const [editTitle, setEditTitle] = useState(node.title || '');
   const [isAddingChild, setIsAddingChild] = useState(false);
   const [newChildContent, setNewChildContent] = useState('');
   const [isExpanded, setIsExpanded] = useState(true);
 
   const childNodes = storage.getChildNodes(node.id);
   const hasChildren = childNodes.length > 0;
+  const isRoot = !node.parentId;
 
   const handleSave = () => {
-    storage.updateNode(node.id, { content: editContent });
+    storage.updateNode(node.id, { 
+      content: editContent,
+      title: isRoot ? (editTitle.trim() || undefined) : undefined
+    });
     setIsEditing(false);
     onNodesChange();
   };
@@ -79,6 +85,14 @@ const NodeItem = ({ node, projectId, level, onNodesChange }: NodeItemProps) => {
             <div className="flex-1 min-w-0">
               {isEditing ? (
                 <div className="space-y-2">
+                  {isRoot && (
+                    <Input
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      className="text-xs font-medium"
+                      placeholder="Node title (optional)"
+                    />
+                  )}
                   <Textarea
                     value={editContent}
                     onChange={(e) => setEditContent(e.target.value)}
@@ -96,6 +110,7 @@ const NodeItem = ({ node, projectId, level, onNodesChange }: NodeItemProps) => {
                       onClick={() => {
                         setIsEditing(false);
                         setEditContent(node.content);
+                        setEditTitle(node.title || '');
                       }}
                       className="text-xs"
                     >
@@ -105,6 +120,12 @@ const NodeItem = ({ node, projectId, level, onNodesChange }: NodeItemProps) => {
                 </div>
               ) : (
                 <div className="group">
+                  {isRoot && node.title && (
+                    <div className="flex items-center gap-1 mb-1">
+                      <Type className="h-3 w-3 text-muted-foreground" />
+                      <h4 className="text-xs font-medium text-foreground">{node.title}</h4>
+                    </div>
+                  )}
                   <div className="prose prose-sm max-w-none text-xs">
                     <div className="whitespace-pre-wrap">{node.content}</div>
                   </div>

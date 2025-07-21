@@ -3,11 +3,12 @@ import { useParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { NodeTree } from '@/components/NodeTree';
 import { CreateVersionDialog } from '@/components/CreateVersionDialog';
 import { VersionHistoryDialog } from '@/components/VersionHistoryDialog';
-import { Project, Node } from '@/types/layercake';
 import { storage, generateId } from '@/lib/storage';
+import { Project, Node } from '@/types/layercake';
 import { ArrowLeft, Plus, FileText } from 'lucide-react';
 
 export const ProjectView = () => {
@@ -16,6 +17,7 @@ export const ProjectView = () => {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [isAddingRoot, setIsAddingRoot] = useState(false);
   const [newRootContent, setNewRootContent] = useState('');
+  const [newRootTitle, setNewRootTitle] = useState('');
 
   useEffect(() => {
     if (projectId) {
@@ -37,11 +39,13 @@ export const ProjectView = () => {
         id: generateId(),
         projectId,
         parentId: null,
+        title: newRootTitle.trim() || undefined,
         content: newRootContent.trim(),
         createdAt: new Date().toISOString(),
       };
       storage.addNode(newNode);
       setNewRootContent('');
+      setNewRootTitle('');
       setIsAddingRoot(false);
       loadNodes();
     }
@@ -57,7 +61,7 @@ export const ProjectView = () => {
   if (!project) {
     return (
       <div className="min-h-screen bg-background flex justify-center items-center">
-        <div className="w-[700px] text-center">
+        <div className="w-[600px] text-center">
           <h1 className="text-base font-medium mb-4">Project Not Found</h1>
           <Link to="/">
             <Button variant="outline" size="sm">
@@ -72,7 +76,7 @@ export const ProjectView = () => {
 
   return (
     <div className="min-h-screen bg-background flex justify-center">
-      <div className="w-[700px] px-4 py-4">
+      <div className="w-[600px] px-4 py-4">
         {/* Header */}
         <div className="border-b border-border pb-3 mb-4">
           <div className="flex items-center justify-between">
@@ -125,6 +129,12 @@ export const ProjectView = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
+              <Input
+                value={newRootTitle}
+                onChange={(e) => setNewRootTitle(e.target.value)}
+                className="text-xs"
+                placeholder="Node title (optional)"
+              />
               <Textarea
                 value={newRootContent}
                 onChange={(e) => setNewRootContent(e.target.value)}
@@ -141,6 +151,7 @@ export const ProjectView = () => {
                   onClick={() => {
                     setIsAddingRoot(false);
                     setNewRootContent('');
+                    setNewRootTitle('');
                   }}
                   size="sm"
                   className="text-xs"
