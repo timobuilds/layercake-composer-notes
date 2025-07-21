@@ -115,7 +115,7 @@ const WorkflowyItem = ({
   return (
     <div className="workflowy-item">
       <div 
-        className={`flex items-center gap-2 py-1 pl-${level * 4} hover:bg-muted/30 rounded group cursor-text`}
+        className={`flex items-baseline gap-2 py-1 pl-${level * 4} hover:bg-muted/30 rounded group cursor-text`}
         onClick={handleClick}
         data-node-id={node.id}
       >
