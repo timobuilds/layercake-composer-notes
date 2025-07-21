@@ -55,6 +55,7 @@ const WorkflowyItem = ({
 }: WorkflowyItemProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(node.content);
+  const [isDragOver, setIsDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   
   const hasChildren = children.length > 0;
@@ -131,15 +132,53 @@ const WorkflowyItem = ({
     handleSave();
   };
 
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.setData('text/plain', node.id);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+    
+    const draggedNodeId = e.dataTransfer.getData('text/plain');
+    if (draggedNodeId && draggedNodeId !== node.id) {
+      // Move the dragged node to be a child of this node
+      storage.updateNode(draggedNodeId, { parentId: node.id });
+      // Trigger refresh through the parent component
+      const event = new CustomEvent('nodesChanged');
+      window.dispatchEvent(event);
+    }
+  };
+
   return (
     <div className="workflowy-item">
       <ContextMenu>
         <ContextMenuTrigger>
           <div 
-            className={`flex items-center gap-2 py-1 hover:bg-muted/30 rounded group cursor-text relative`}
+            className={`flex items-center gap-2 py-1 hover:bg-muted/30 rounded group cursor-pointer relative transition-colors ${
+              isDragOver ? 'bg-primary/10 border-l-4 border-primary' : ''
+            }`}
             onClick={handleClick}
             data-node-id={node.id}
             style={{ paddingLeft: `${indentLevel + 8}px` }}
+            draggable={!isEditing}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
           >
             {/* Three dots menu - always takes space but only visible on hover */}
             <div className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 w-6">{/* Always reserve space */}
@@ -371,6 +410,16 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
 
   useEffect(() => {
     loadNodes();
+    
+    // Listen for custom drag events to refresh the view
+    const handleNodesChanged = () => {
+      loadNodes();
+    };
+    
+    window.addEventListener('nodesChanged', handleNodesChanged);
+    return () => {
+      window.removeEventListener('nodesChanged', handleNodesChanged);
+    };
   }, [loadNodes]);
 
   const handleFocus = (nodeId: string) => {
