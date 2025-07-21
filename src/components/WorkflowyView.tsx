@@ -475,9 +475,27 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
       loadNodes();
     };
     
+    // Keyboard event handling for undo/redo
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        if (storage.undo()) {
+          loadNodes();
+        }
+      } else if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        if (storage.redo()) {
+          loadNodes();
+        }
+      }
+    };
+    
     window.addEventListener('nodesChanged', handleNodesChanged);
+    window.addEventListener('keydown', handleKeyDown);
+    
     return () => {
       window.removeEventListener('nodesChanged', handleNodesChanged);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, [loadNodes]);
 

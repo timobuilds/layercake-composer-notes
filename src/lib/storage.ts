@@ -1,4 +1,5 @@
 import { Project, Node, ProjectVersion } from '@/types/layercake';
+import { undoManager } from './undoManager';
 
 const PROJECTS_KEY = 'layercake-projects';
 const NODES_KEY = 'layercake-nodes';
@@ -52,10 +53,28 @@ export const storage = {
     this.saveNodes(nodes);
   },
 
-  updateNode(id: string, updates: Partial<Node>): void {
+  updateNode(id: string, updates: Partial<Node>, recordUndo: boolean = true): void {
     const nodes = this.getNodes();
     const index = nodes.findIndex(n => n.id === id);
     if (index !== -1) {
+      const oldNode = nodes[index];
+      
+      // Record undo for move operations
+      if (recordUndo && (updates.parentId !== undefined || updates.order !== undefined)) {
+        undoManager.recordMove(
+          id, 
+          oldNode.parentId, 
+          updates.parentId !== undefined ? updates.parentId : oldNode.parentId,
+          oldNode.order,
+          updates.order !== undefined ? updates.order : oldNode.order
+        );
+      }
+      
+      // Record undo for content edits
+      if (recordUndo && updates.content !== undefined && updates.content !== oldNode.content) {
+        undoManager.recordEdit(id, oldNode.content, updates.content);
+      }
+      
       nodes[index] = { ...nodes[index], ...updates };
       this.saveNodes(nodes);
     }
@@ -154,8 +173,58 @@ export const storage = {
   reorderSiblings(parentId: string | null): void {
     const siblings = this.getChildNodes(parentId || '');
     siblings.forEach((node, index) => {
-      this.updateNode(node.id, { order: (index + 1) * 1000 });
+      this.updateNode(node.id, { order: (index + 1) * 1000 }, false); // Don't record undo for reordering
     });
+  },
+
+  // Undo/Redo functionality
+  undo(): boolean {
+    const action = undoManager.undo();
+    if (!action) return false;
+
+    switch (action.type) {
+      case 'move':
+        this.updateNode(action.nodeId, {
+          parentId: action.data.oldParentId,
+          order: action.data.oldOrder
+        }, false); // Don't record undo for undo operations
+        break;
+      case 'edit':
+        this.updateNode(action.nodeId, {
+          content: action.data.oldContent
+        }, false);
+        break;
+      // Add other undo types as needed
+    }
+    return true;
+  },
+
+  redo(): boolean {
+    const action = undoManager.redo();
+    if (!action) return false;
+
+    switch (action.type) {
+      case 'move':
+        this.updateNode(action.nodeId, {
+          parentId: action.data.newParentId,
+          order: action.data.newOrder
+        }, false);
+        break;
+      case 'edit':
+        this.updateNode(action.nodeId, {
+          content: action.data.newContent
+        }, false);
+        break;
+    }
+    return true;
+  },
+
+  canUndo(): boolean {
+    return undoManager.canUndo();
+  },
+
+  canRedo(): boolean {
+    return undoManager.canRedo();
   },
 
   // Versions
