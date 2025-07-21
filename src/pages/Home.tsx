@@ -43,7 +43,7 @@ export const Home = () => {
               <button
                 key={persona}
                 draggable
-                className={`group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all cursor-pointer border border-white/20 ${
+                className={`group/persona px-2 py-1 rounded text-xs font-normal text-white flex items-center gap-1 hover:bg-opacity-90 transition-all cursor-pointer border border-white/10 bg-opacity-70 ${
                   draggedPersona === persona ? 'opacity-50' : ''
                 } ${
                   dragOverPersona === persona ? 'scale-105 shadow-lg' : ''
@@ -97,7 +97,7 @@ export const Home = () => {
               </button>
             ))}
             <button 
-              className="px-2 py-1 rounded text-xs font-medium border border-dashed border-muted-foreground/50 text-muted-foreground hover:bg-muted/50 transition-colors"
+              className="px-2 py-1 rounded text-xs font-normal border border-dashed border-muted-foreground/30 text-muted-foreground/70 hover:bg-muted/30 transition-colors"
               onClick={() => setShowPersonaManager(true)}
             >
               + Add Persona
