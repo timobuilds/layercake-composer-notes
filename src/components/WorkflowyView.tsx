@@ -138,8 +138,8 @@ const WorkflowyItem = ({
             data-node-id={node.id}
             style={{ paddingLeft: `${indentLevel + 8}px` }}
           >
-            {/* Three dots menu - only visible on hover */}
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+            {/* Three dots menu - always takes space but only visible on hover */}
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 w-6">{/* Always reserve space */}
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
