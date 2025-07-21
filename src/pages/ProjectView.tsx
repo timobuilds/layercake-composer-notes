@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { NodeTree } from '@/components/NodeTree';
+import { CreateVersionDialog } from '@/components/CreateVersionDialog';
+import { VersionHistoryDialog } from '@/components/VersionHistoryDialog';
 import { Project, Node } from '@/types/layercake';
 import { storage, generateId } from '@/lib/storage';
-import { ArrowLeft, Plus, FileText, Brain } from 'lucide-react';
+import { ArrowLeft, Plus, FileText } from 'lucide-react';
 
 export const ProjectView = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -45,15 +47,22 @@ export const ProjectView = () => {
     }
   };
 
+  const handleVersionCreated = () => {
+    if (projectId) {
+      const updatedProject = storage.getProject(projectId);
+      setProject(updatedProject || null);
+    }
+  };
+
   if (!project) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-secondary/30 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">Project Not Found</h1>
+          <h1 className="text-base font-medium mb-4">Project Not Found</h1>
           <Link to="/">
-            <Button variant="outline">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Home
+            <Button variant="outline" size="sm">
+              <ArrowLeft className="h-3 w-3 mr-1" />
+              Back
             </Button>
           </Link>
         </div>
@@ -62,67 +71,70 @@ export const ProjectView = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-secondary/30">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-4">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Link to="/">
-              <Button variant="outline" size="sm">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
-              </Button>
-            </Link>
+        <div className="border-b border-border pb-3 mb-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-creative/20 border border-primary/20">
-                <FileText className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold">{project.name}</h1>
-                <p className="text-muted-foreground">
-                  {nodes.length} root {nodes.length === 1 ? 'node' : 'nodes'}
-                </p>
+              <Link to="/">
+                <Button variant="outline" size="sm" className="text-xs">
+                  <ArrowLeft className="h-3 w-3 mr-1" />
+                  Back
+                </Button>
+              </Link>
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <h1 className="text-lg font-medium">{project.name}</h1>
+                  <p className="text-xs text-muted-foreground">
+                    v{project.currentVersion} • {nodes.length} root nodes
+                  </p>
+                </div>
               </div>
             </div>
+            
+            <div className="flex gap-2">
+              <CreateVersionDialog 
+                projectId={projectId!} 
+                onVersionCreated={handleVersionCreated}
+              />
+              <VersionHistoryDialog 
+                projectId={projectId!} 
+                onVersionRestored={loadNodes}
+              />
+              <Button
+                onClick={() => setIsAddingRoot(true)}
+                size="sm"
+                className="text-xs"
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Add Node
+              </Button>
+            </div>
           </div>
-          
-          <Button
-            variant="gradient"
-            onClick={() => setIsAddingRoot(true)}
-            className="shadow-lg"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Root Node
-          </Button>
         </div>
 
         {/* Add Root Node Form */}
         {isAddingRoot && (
-          <Card className="mb-8 border-primary/20 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Plus className="h-5 w-5" />
+          <Card className="mb-4">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <Plus className="h-4 w-4" />
                 Create Root Node
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3">
               <Textarea
                 value={newRootContent}
                 onChange={(e) => setNewRootContent(e.target.value)}
-                className="min-h-[120px] resize-none"
-                placeholder="Write your root node content in markdown...
-
-Example:
-# My Main Idea
-This is the starting point for organizing my thoughts.
-
-- **Key concept**: Important detail
-- Next steps to explore"
+                className="min-h-[80px] resize-none text-xs"
+                placeholder="Write your root node content..."
               />
               <div className="flex gap-2">
-                <Button onClick={handleAddRootNode} disabled={!newRootContent.trim()}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Node
+                <Button onClick={handleAddRootNode} disabled={!newRootContent.trim()} size="sm" className="text-xs">
+                  <Plus className="h-3 w-3 mr-1" />
+                  Create
                 </Button>
                 <Button
                   variant="outline"
@@ -130,6 +142,8 @@ This is the starting point for organizing my thoughts.
                     setIsAddingRoot(false);
                     setNewRootContent('');
                   }}
+                  size="sm"
+                  className="text-xs"
                 >
                   Cancel
                 </Button>
@@ -140,7 +154,7 @@ This is the starting point for organizing my thoughts.
 
         {/* Nodes */}
         {nodes.length > 0 ? (
-          <div className="space-y-6">
+          <div className="space-y-3">
             <NodeTree
               nodes={nodes}
               projectId={projectId!}
@@ -149,22 +163,19 @@ This is the starting point for organizing my thoughts.
           </div>
         ) : (
           <div className="text-center py-16">
-            <div className="flex justify-center mb-6">
-              <div className="p-6 rounded-full bg-gradient-to-br from-primary/10 to-creative/10 border border-primary/20">
-                <Brain className="h-16 w-16 text-primary" />
-              </div>
+            <div className="text-muted-foreground mb-4">
+              <FileText className="h-12 w-12 mx-auto" />
             </div>
-            <h3 className="text-2xl font-semibold mb-4">Start Building Your Knowledge Tree</h3>
-            <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-              Create your first root node to begin organizing your thoughts hierarchically. Each node can have sub-nodes, creating a beautiful tree of connected ideas.
+            <h3 className="text-base font-medium mb-2">No nodes yet</h3>
+            <p className="text-xs text-muted-foreground mb-4">
+              Create your first node to start organizing your thoughts.
             </p>
             <Button
-              variant="gradient"
-              size="lg"
+              size="sm"
               onClick={() => setIsAddingRoot(true)}
-              className="shadow-lg"
+              className="text-xs"
             >
-              <Plus className="h-5 w-5 mr-2" />
+              <Plus className="h-3 w-3 mr-1" />
               Create First Node
             </Button>
           </div>

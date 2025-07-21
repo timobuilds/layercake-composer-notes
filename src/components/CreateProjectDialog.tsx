@@ -22,6 +22,7 @@ export const CreateProjectDialog = ({ onProjectCreated }: CreateProjectDialogPro
         id: generateId(),
         name: name.trim(),
         createdAt: new Date().toISOString(),
+        currentVersion: '1.0.0',
       };
       storage.addProject(project);
       onProjectCreated(project);
@@ -33,9 +34,9 @@ export const CreateProjectDialog = ({ onProjectCreated }: CreateProjectDialogPro
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="gradient" size="lg" className="shadow-lg">
-          <Plus className="h-5 w-5 mr-2" />
-          Create New Project
+        <Button size="lg">
+          <Plus className="h-4 w-4 mr-1" />
+          New Project
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">

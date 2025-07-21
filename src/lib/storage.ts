@@ -1,7 +1,8 @@
-import { Project, Node } from '@/types/layercake';
+import { Project, Node, ProjectVersion } from '@/types/layercake';
 
 const PROJECTS_KEY = 'layercake-projects';
 const NODES_KEY = 'layercake-nodes';
+const VERSIONS_KEY = 'layercake-versions';
 
 export const storage = {
   // Projects
@@ -18,6 +19,9 @@ export const storage = {
     const projects = this.getProjects();
     projects.push(project);
     this.saveProjects(projects);
+    
+    // Create initial version
+    this.createVersion(project.id, '1.0.0', 'Initial version', []);
   },
 
   getProject(id: string): Project | undefined {
@@ -65,6 +69,64 @@ export const storage = {
 
   getRootNodes(projectId: string): Node[] {
     return this.getNodes().filter(n => n.projectId === projectId && !n.parentId);
+  },
+
+  // Versions
+  getVersions(): ProjectVersion[] {
+    const stored = localStorage.getItem(VERSIONS_KEY);
+    return stored ? JSON.parse(stored) : [];
+  },
+
+  saveVersions(versions: ProjectVersion[]): void {
+    localStorage.setItem(VERSIONS_KEY, JSON.stringify(versions));
+  },
+
+  createVersion(projectId: string, version: string, name: string, nodes: Node[], description?: string): ProjectVersion {
+    const newVersion: ProjectVersion = {
+      id: generateId(),
+      projectId,
+      version,
+      name,
+      description,
+      createdAt: new Date().toISOString(),
+      nodeSnapshot: JSON.parse(JSON.stringify(nodes)) // Deep copy
+    };
+    
+    const versions = this.getVersions();
+    versions.push(newVersion);
+    this.saveVersions(versions);
+    
+    // Update project's current version
+    const projects = this.getProjects();
+    const projectIndex = projects.findIndex(p => p.id === projectId);
+    if (projectIndex !== -1) {
+      projects[projectIndex].currentVersion = version;
+      this.saveProjects(projects);
+    }
+    
+    return newVersion;
+  },
+
+  getProjectVersions(projectId: string): ProjectVersion[] {
+    return this.getVersions().filter(v => v.projectId === projectId);
+  },
+
+  restoreVersion(projectId: string, versionId: string): void {
+    const versions = this.getVersions();
+    const version = versions.find(v => v.id === versionId);
+    if (!version) return;
+
+    // Clear current nodes
+    const allNodes = this.getNodes();
+    const filteredNodes = allNodes.filter(n => n.projectId !== projectId);
+    
+    // Restore nodes from snapshot
+    const restoredNodes = version.nodeSnapshot.map((node: Node) => ({
+      ...node,
+      id: generateId() // Generate new IDs to avoid conflicts
+    }));
+    
+    this.saveNodes([...filteredNodes, ...restoredNodes]);
   }
 };
 

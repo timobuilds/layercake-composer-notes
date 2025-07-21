@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -56,40 +54,40 @@ const NodeItem = ({ node, projectId, level, onNodesChange }: NodeItemProps) => {
     }
   };
 
-  const indentClass = level > 0 ? `ml-${Math.min(level * 6, 24)}` : '';
+  const indentClass = level > 0 ? `ml-${Math.min(level * 4, 16)}` : '';
 
   return (
-    <div className={`${indentClass} mb-4`}>
-      <Card className="shadow-sm border-border/40 hover:border-primary/30 transition-all duration-200">
-        <CardContent className="p-4">
-          <div className="flex items-start gap-3">
+    <div className={`${indentClass} mb-2`}>
+      <Card className="border border-border/40">
+        <CardContent className="p-2">
+          <div className="flex items-start gap-2">
             {hasChildren && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="mt-1 p-1 h-6 w-6"
+                className="p-0 h-4 w-4 mt-1"
               >
                 {isExpanded ? (
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-3 w-3" />
                 ) : (
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronRight className="h-3 w-3" />
                 )}
               </Button>
             )}
             
             <div className="flex-1 min-w-0">
               {isEditing ? (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <Textarea
                     value={editContent}
                     onChange={(e) => setEditContent(e.target.value)}
-                    className="min-h-[100px] resize-none"
+                    className="min-h-[60px] resize-none text-xs"
                     placeholder="Write in markdown..."
                   />
-                  <div className="flex gap-2">
-                    <Button variant="default" size="sm" onClick={handleSave}>
-                      <Save className="h-4 w-4 mr-1" />
+                  <div className="flex gap-1">
+                    <Button variant="default" size="sm" onClick={handleSave} className="text-xs">
+                      <Save className="h-3 w-3 mr-1" />
                       Save
                     </Button>
                     <Button
@@ -99,35 +97,35 @@ const NodeItem = ({ node, projectId, level, onNodesChange }: NodeItemProps) => {
                         setIsEditing(false);
                         setEditContent(node.content);
                       }}
+                      className="text-xs"
                     >
-                      <X className="h-4 w-4 mr-1" />
                       Cancel
                     </Button>
                   </div>
                 </div>
               ) : (
                 <div className="group">
-                  <div className="prose prose-sm max-w-none">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {node.content}
-                    </ReactMarkdown>
+                  <div className="prose prose-sm max-w-none text-xs">
+                    <div className="whitespace-pre-wrap">{node.content}</div>
                   </div>
-                  <div className="flex gap-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Button
-                      variant="soft"
+                      variant="ghost"
                       size="sm"
                       onClick={() => setIsEditing(true)}
+                      className="text-xs h-6"
                     >
-                      <Edit3 className="h-4 w-4 mr-1" />
+                      <Edit3 className="h-3 w-3 mr-1" />
                       Edit
                     </Button>
                     <Button
-                      variant="soft"
+                      variant="ghost"
                       size="sm"
                       onClick={() => setIsAddingChild(true)}
+                      className="text-xs h-6"
                     >
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add Sub-node
+                      <Plus className="h-3 w-3 mr-1" />
+                      Add
                     </Button>
                   </div>
                 </div>
@@ -136,16 +134,16 @@ const NodeItem = ({ node, projectId, level, onNodesChange }: NodeItemProps) => {
           </div>
           
           {isAddingChild && (
-            <div className="mt-4 pl-9 space-y-3">
+            <div className="mt-2 pl-6 space-y-2">
               <Textarea
                 value={newChildContent}
                 onChange={(e) => setNewChildContent(e.target.value)}
-                className="min-h-[80px] resize-none"
-                placeholder="Write sub-node content in markdown..."
+                className="min-h-[60px] resize-none text-xs"
+                placeholder="Write sub-node content..."
               />
-              <div className="flex gap-2">
-                <Button variant="default" size="sm" onClick={handleAddChild}>
-                  <Plus className="h-4 w-4 mr-1" />
+              <div className="flex gap-1">
+                <Button variant="default" size="sm" onClick={handleAddChild} className="text-xs">
+                  <Plus className="h-3 w-3 mr-1" />
                   Add
                 </Button>
                 <Button
@@ -155,6 +153,7 @@ const NodeItem = ({ node, projectId, level, onNodesChange }: NodeItemProps) => {
                     setIsAddingChild(false);
                     setNewChildContent('');
                   }}
+                  className="text-xs"
                 >
                   Cancel
                 </Button>
@@ -165,7 +164,7 @@ const NodeItem = ({ node, projectId, level, onNodesChange }: NodeItemProps) => {
       </Card>
       
       {hasChildren && isExpanded && (
-        <div className="mt-4">
+        <div className="mt-2">
           <NodeTree
             nodes={childNodes}
             projectId={projectId}
@@ -180,7 +179,7 @@ const NodeItem = ({ node, projectId, level, onNodesChange }: NodeItemProps) => {
 
 export const NodeTree = ({ nodes, projectId, level = 0, onNodesChange }: NodeTreeProps) => {
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       {nodes.map((node) => (
         <NodeItem
           key={node.id}
