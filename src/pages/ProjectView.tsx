@@ -76,7 +76,7 @@ export const ProjectView = () => {
     <div className="min-h-screen bg-background flex justify-center">
       <div className="w-[600px] px-4 py-4">
         {/* Header */}
-        <div className="border-b border-border pb-3 mb-4" style={{ paddingLeft: '8px' }}>
+        <div className="border-b border-border pb-3 mb-4" style={{ paddingLeft: '84px' }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Link to="/" className="hover:text-foreground transition-colors">

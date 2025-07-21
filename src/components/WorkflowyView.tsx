@@ -631,7 +631,7 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
     <div className="workflowy-container">
       {/* Breadcrumbs */}
       {breadcrumbs.length > 0 && (
-        <div className="flex items-center gap-2 mb-6 text-sm text-muted-foreground" style={{ paddingLeft: '8px' }}>
+        <div className="flex items-center gap-2 mb-6 text-sm text-muted-foreground" style={{ paddingLeft: '84px' }}>
           <Button
             variant="ghost"
             size="sm"
