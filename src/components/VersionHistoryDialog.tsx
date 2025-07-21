@@ -30,6 +30,7 @@ export const VersionHistoryDialog = ({
   const [internalIsOpen, setInternalIsOpen] = useState(false);
   const [versions, setVersions] = useState<ProjectVersion[]>([]);
   const [selectedVersions, setSelectedVersions] = useState<string[]>([]);
+  const [currentProject, setCurrentProject] = useState<any>(null);
   const [version, setVersion] = useState('');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -57,6 +58,7 @@ export const VersionHistoryDialog = ({
 
   const loadVersions = () => {
     setVersions(storage.getProjectVersions(projectId));
+    setCurrentProject(storage.getProject(projectId));
   };
 
   const handleRestore = (versionId: string) => {
@@ -206,6 +208,7 @@ export const VersionHistoryDialog = ({
                   const timeAgo = formatDistance(createdAt, new Date(), { addSuffix: true });
                   const isSelected = selectedVersions.includes(version.id);
                   const isMergeVersion = version.name.startsWith('Merge:');
+                  const isCurrentVersion = currentProject && version.version === currentProject.currentVersion;
                   
                   return (
                     <div key={version.id} className="relative flex items-start gap-4 pb-4">
@@ -215,9 +218,11 @@ export const VersionHistoryDialog = ({
                           className={`w-3 h-3 rounded-full border-2 bg-background relative z-10 cursor-pointer transition-colors ${
                             isSelected 
                               ? 'border-primary bg-primary' 
-                              : isMergeVersion
-                                ? 'border-orange-500 bg-orange-500'
-                                : 'border-muted-foreground hover:border-primary'
+                              : isCurrentVersion
+                                ? 'border-green-500 bg-green-500 ring-2 ring-green-200'
+                                : isMergeVersion
+                                  ? 'border-orange-500 bg-orange-500'
+                                  : 'border-muted-foreground hover:border-primary'
                           }`}
                           onClick={() => handleVersionSelect(version.id)}
                         >
@@ -237,13 +242,22 @@ export const VersionHistoryDialog = ({
                       
                       {/* Version card */}
                       <Card className={`flex-1 border transition-colors ${
-                        isSelected ? 'border-primary bg-primary/5' : 'border-border/40'
+                        isSelected 
+                          ? 'border-primary bg-primary/5' 
+                          : isCurrentVersion
+                            ? 'border-green-500 bg-green-50 ring-1 ring-green-200'
+                            : 'border-border/40'
                       }`}>
                         <CardHeader className="pb-2">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <CardTitle className="text-sm flex items-center gap-2">
                                 {version.name}
+                                {isCurrentVersion && (
+                                  <span className="bg-green-500 text-white px-1.5 py-0.5 rounded text-xs font-medium">
+                                    CURRENT
+                                  </span>
+                                )}
                                 {isMergeVersion && (
                                   <GitBranch className="h-3 w-3 text-orange-500" />
                                 )}
