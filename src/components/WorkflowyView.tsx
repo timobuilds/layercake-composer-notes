@@ -59,6 +59,8 @@ const WorkflowyItem = ({
   const [isDragOver, setIsDragOver] = useState(false);
   const [dragPosition, setDragPosition] = useState<'before' | 'after' | 'child' | null>(null);
   const [showPersonaManager, setShowPersonaManager] = useState(false);
+  const [draggedPersona, setDraggedPersona] = useState<string | null>(null);
+  const [dragOverPersona, setDragOverPersona] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   
   const hasChildren = children.length > 0;
@@ -259,82 +261,65 @@ const WorkflowyItem = ({
                         <>
                           <div className="px-2 py-1">
                             <label className="text-xs text-muted-foreground mb-1 block">Personas</label>
-                            <div className="flex flex-wrap gap-1">
-                              <button 
-                                className="group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all cursor-pointer"
-                                style={{ backgroundColor: 'hsl(var(--persona-blue))' }}
-                                onClick={() => setShowPersonaManager(true)}
-                                title="Edit personas"
-                              >
-                                <span>Screenwriter</span>
-                                <button 
-                                  className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
-                                  onClick={(e) => e.stopPropagation()}
-                                  title="Remove persona"
-                                >
-                                  <X className="h-2.5 w-2.5" />
-                                </button>
-                              </button>
-                              <button 
-                                className="group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all cursor-pointer"
-                                style={{ backgroundColor: 'hsl(var(--persona-green))' }}
-                                onClick={() => setShowPersonaManager(true)}
-                                title="Edit personas"
-                              >
-                                <span>Editor</span>
-                                <button 
-                                  className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
-                                  onClick={(e) => e.stopPropagation()}
-                                  title="Remove persona"
-                                >
-                                  <X className="h-2.5 w-2.5" />
-                                </button>
-                              </button>
-                              <button 
-                                className="group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all cursor-pointer"
-                                style={{ backgroundColor: 'hsl(var(--persona-yellow))' }}
-                                onClick={() => setShowPersonaManager(true)}
-                                title="Edit personas"
-                              >
-                                <span>Director</span>
-                                <button 
-                                  className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
-                                  onClick={(e) => e.stopPropagation()}
-                                  title="Remove persona"
-                                >
-                                  <X className="h-2.5 w-2.5" />
-                                </button>
-                              </button>
-                              <button 
-                                className="group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all cursor-pointer"
-                                style={{ backgroundColor: 'hsl(var(--persona-brown))' }}
-                                onClick={() => setShowPersonaManager(true)}
-                                title="Edit personas"
-                              >
-                                <span>Producer</span>
-                                <button 
-                                  className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
-                                  onClick={(e) => e.stopPropagation()}
-                                  title="Remove persona"
-                                >
-                                  <X className="h-2.5 w-2.5" />
-                                </button>
-                              </button>
-                              <button 
-                                className="group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all cursor-pointer"
-                                style={{ backgroundColor: 'hsl(var(--persona-purple))' }}
-                                onClick={() => setShowPersonaManager(true)}
-                                title="Edit personas"
-                              >
-                                <span>Actor</span>
-                                <button 
-                                  className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
-                                  onClick={(e) => e.stopPropagation()}
-                                  title="Remove persona"
-                                >
-                                  <X className="h-2.5 w-2.5" />
-                                </button>
-                              </button>
+                             <div className="flex flex-wrap gap-1">
+                               {['Screenwriter', 'Editor', 'Director', 'Producer', 'Actor'].map((persona, index) => (
+                                 <button
+                                   key={persona}
+                                   draggable
+                                   className={`group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all cursor-pointer ${
+                                     draggedPersona === persona ? 'opacity-50' : ''
+                                   } ${
+                                     dragOverPersona === persona ? 'scale-105 shadow-lg' : ''
+                                   }`}
+                                   style={{ 
+                                     backgroundColor: `hsl(var(--persona-${
+                                       ['blue', 'green', 'yellow', 'brown', 'purple'][index]
+                                     }))` 
+                                   }}
+                                   onDragStart={(e) => {
+                                     e.stopPropagation();
+                                     setDraggedPersona(persona);
+                                     e.dataTransfer.setData('text/plain', persona);
+                                   }}
+                                   onDragEnd={() => {
+                                     setDraggedPersona(null);
+                                     setDragOverPersona(null);
+                                   }}
+                                   onDragOver={(e) => {
+                                     e.preventDefault();
+                                     e.stopPropagation();
+                                     if (draggedPersona && draggedPersona !== persona) {
+                                       setDragOverPersona(persona);
+                                     }
+                                   }}
+                                   onDragLeave={(e) => {
+                                     e.stopPropagation();
+                                     setDragOverPersona(null);
+                                   }}
+                                   onDrop={(e) => {
+                                     e.preventDefault();
+                                     e.stopPropagation();
+                                     const draggedItem = e.dataTransfer.getData('text/plain');
+                                     if (draggedItem && draggedItem !== persona) {
+                                       // Here you would reorder the personas
+                                       console.log(`Moving ${draggedItem} to position of ${persona}`);
+                                     }
+                                     setDraggedPersona(null);
+                                     setDragOverPersona(null);
+                                   }}
+                                   onClick={() => setShowPersonaManager(true)}
+                                   title="Edit personas"
+                                 >
+                                   <span>{persona}</span>
+                                   <button 
+                                     className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
+                                     onClick={(e) => e.stopPropagation()}
+                                     title="Remove persona"
+                                   >
+                                     <X className="h-2.5 w-2.5" />
+                                   </button>
+                                 </button>
+                               ))}
                               <button 
                                 className="px-2 py-1 rounded text-xs font-medium border border-dashed border-muted-foreground/50 text-muted-foreground hover:bg-muted/50 transition-colors"
                                 onClick={() => setShowPersonaManager(true)}
