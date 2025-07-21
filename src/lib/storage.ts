@@ -141,6 +141,58 @@ export const storage = {
     }));
     
     this.saveNodes([...filteredNodes, ...restoredNodes]);
+  },
+
+  mergeVersions(projectId: string, sourceVersionId: string, targetVersionId: string, destructive: boolean = false): ProjectVersion {
+    const versions = this.getVersions();
+    const sourceVersion = versions.find(v => v.id === sourceVersionId);
+    const targetVersion = versions.find(v => v.id === targetVersionId);
+    
+    if (!sourceVersion || !targetVersion) {
+      throw new Error('Source or target version not found');
+    }
+
+    // Create merged node snapshot
+    let mergedNodes: Node[] = [];
+    
+    if (destructive) {
+      // Destructive merge: replace target nodes with source nodes
+      mergedNodes = [...sourceVersion.nodeSnapshot];
+    } else {
+      // Non-destructive merge: combine nodes, preferring source for conflicts
+      const targetNodesMap = new Map(targetVersion.nodeSnapshot.map(node => [node.id, node]));
+      const sourceNodesMap = new Map(sourceVersion.nodeSnapshot.map(node => [node.id, node]));
+      
+      // Start with target nodes
+      mergedNodes = [...targetVersion.nodeSnapshot];
+      
+      // Add or update with source nodes
+      sourceVersion.nodeSnapshot.forEach(sourceNode => {
+        const existingIndex = mergedNodes.findIndex(node => node.id === sourceNode.id);
+        if (existingIndex !== -1) {
+          // Update existing node
+          mergedNodes[existingIndex] = sourceNode;
+        } else {
+          // Add new node
+          mergedNodes.push(sourceNode);
+        }
+      });
+    }
+
+    // Create new version for merge result
+    const projects = this.getProjects();
+    const project = projects.find(p => p.id === projectId);
+    const newVersionNumber = project ? (parseFloat(project.currentVersion) + 0.1).toFixed(1) : '1.0';
+    
+    const mergedVersion = this.createVersion(
+      projectId,
+      newVersionNumber,
+      `Merge: ${sourceVersion.name} → ${targetVersion.name}`,
+      mergedNodes,
+      `${destructive ? 'Destructive' : 'Non-destructive'} merge of ${sourceVersion.name} into ${targetVersion.name}`
+    );
+
+    return mergedVersion;
   }
 };
 
