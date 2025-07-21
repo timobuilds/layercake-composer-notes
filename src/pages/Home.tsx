@@ -4,49 +4,33 @@ import { CreateProjectDialog } from '@/components/CreateProjectDialog';
 import { Project } from '@/types/layercake';
 import { storage } from '@/lib/storage';
 import { Cake } from 'lucide-react';
-
 export const Home = () => {
   const [projects, setProjects] = useState<Project[]>([]);
-
   useEffect(() => {
     const allProjects = storage.getProjects();
     // Sort by most recently created (newest first)
-    const sortedProjects = allProjects.sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    const sortedProjects = allProjects.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     setProjects(sortedProjects);
   }, []);
-
   const handleProjectCreated = (project: Project) => {
     setProjects([project, ...projects]);
   };
-
-  return (
-    <div className="min-h-screen bg-background flex justify-center">
+  return <div className="min-h-screen bg-background flex justify-center">
       <div className="w-[600px] px-4 py-6">
         {/* Header */}
         <div className="border-b border-border pb-4 mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <img 
-                src="/lovable-uploads/adaf8dc8-fea2-43b5-9c01-f47ea838a7f7.png" 
-                alt="Layercake Logo" 
-                className="h-8 w-auto"
-              />
+              <h1 className="text-xl font-medium object-scale-down">Layercake</h1>
             </div>
             <CreateProjectDialog onProjectCreated={handleProjectCreated} />
           </div>
         </div>
 
         {/* Projects List */}
-        {projects.length > 0 ? (
-          <div className="space-y-3">
-            {projects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-16">
+        {projects.length > 0 ? <div className="space-y-3">
+            {projects.map(project => <ProjectCard key={project.id} project={project} />)}
+          </div> : <div className="text-center py-16">
             <div className="text-muted-foreground mb-4">
               <Cake className="h-12 w-12 mx-auto" />
             </div>
@@ -54,9 +38,7 @@ export const Home = () => {
             <p className="text-xs text-muted-foreground mb-4">
               Create your first project to get started.
             </p>
-          </div>
-        )}
+          </div>}
       </div>
-    </div>
-  );
+    </div>;
 };
