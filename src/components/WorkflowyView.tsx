@@ -12,8 +12,7 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
+import { PersonaManager } from '@/components/PersonaManager/PersonaManager';
 
 interface WorkflowyViewProps {
   projectId: string;
@@ -53,12 +52,13 @@ const WorkflowyItem = ({
   onOutdent,
   onCopyTree,
   onToggleLock,
-  children 
+  children
 }: WorkflowyItemProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(node.content);
   const [isDragOver, setIsDragOver] = useState(false);
   const [dragPosition, setDragPosition] = useState<'before' | 'after' | 'child' | null>(null);
+  const [showPersonaManager, setShowPersonaManager] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   
   const hasChildren = children.length > 0;
@@ -275,98 +275,12 @@ const WorkflowyItem = ({
                               <div className="px-2 py-1 rounded text-xs font-medium text-white" style={{ backgroundColor: 'hsl(var(--persona-purple))' }}>
                                 Actor
                               </div>
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <button className="px-2 py-1 rounded text-xs font-medium border border-dashed border-muted-foreground/50 text-muted-foreground hover:bg-muted/50 transition-colors">
-                                    <Plus className="h-3 w-3" />
-                                  </button>
-                                </DialogTrigger>
-                                <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
-                                  <DialogHeader>
-                                    <DialogTitle>Prompt Persona Manager</DialogTitle>
-                                  </DialogHeader>
-                                  <div className="flex flex-1 gap-6 overflow-hidden">
-                                    {/* Existing Personas List */}
-                                    <div className="w-1/3 space-y-2">
-                                      <h3 className="text-sm font-medium">Existing Personas</h3>
-                                      <div className="space-y-2 max-h-96 overflow-y-auto">
-                                        <div className="p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
-                                          <div className="flex items-center justify-between mb-2">
-                                            <div className="flex items-center gap-2">
-                                              <div className="w-3 h-3 rounded" style={{ backgroundColor: 'hsl(var(--persona-blue))' }}></div>
-                                              <span className="text-sm font-medium">Screenwriter</span>
-                                            </div>
-                                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                                              <Trash2 className="h-3 w-3" />
-                                            </Button>
-                                          </div>
-                                          <p className="text-xs text-muted-foreground line-clamp-2">You are a professional screenwriter...</p>
-                                        </div>
-                                        <div className="p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
-                                          <div className="flex items-center justify-between mb-2">
-                                            <div className="flex items-center gap-2">
-                                              <div className="w-3 h-3 rounded" style={{ backgroundColor: 'hsl(var(--persona-green))' }}></div>
-                                              <span className="text-sm font-medium">Editor</span>
-                                            </div>
-                                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                                              <Trash2 className="h-3 w-3" />
-                                            </Button>
-                                          </div>
-                                          <p className="text-xs text-muted-foreground line-clamp-2">You are a skilled film editor...</p>
-                                        </div>
-                                        <div className="p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
-                                          <div className="flex items-center justify-between mb-2">
-                                            <div className="flex items-center gap-2">
-                                              <div className="w-3 h-3 rounded" style={{ backgroundColor: 'hsl(var(--persona-yellow))' }}></div>
-                                              <span className="text-sm font-medium">Director</span>
-                                            </div>
-                                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                                              <Trash2 className="h-3 w-3" />
-                                            </Button>
-                                          </div>
-                                          <p className="text-xs text-muted-foreground line-clamp-2">You are an experienced film director...</p>
-                                        </div>
-                                      </div>
-                                    </div>
-
-                                    {/* Persona Editor */}
-                                    <div className="flex-1 space-y-4">
-                                      <div className="space-y-2">
-                                        <label className="text-sm font-medium">Persona Name</label>
-                                        <Input placeholder="e.g. Screenwriter, Editor, Director..." />
-                                      </div>
-                                      <div className="space-y-2">
-                                        <label className="text-sm font-medium">Color</label>
-                                        <div className="flex gap-2">
-                                          <button className="w-8 h-8 rounded border-2 border-border" style={{ backgroundColor: 'hsl(var(--persona-blue))' }}></button>
-                                          <button className="w-8 h-8 rounded border-2 border-border" style={{ backgroundColor: 'hsl(var(--persona-green))' }}></button>
-                                          <button className="w-8 h-8 rounded border-2 border-border" style={{ backgroundColor: 'hsl(var(--persona-yellow))' }}></button>
-                                          <button className="w-8 h-8 rounded border-2 border-border" style={{ backgroundColor: 'hsl(var(--persona-brown))' }}></button>
-                                          <button className="w-8 h-8 rounded border-2 border-primary" style={{ backgroundColor: 'hsl(var(--persona-purple))' }}></button>
-                                        </div>
-                                      </div>
-                                      <div className="space-y-2 flex-1">
-                                        <label className="text-sm font-medium">Instruction Prompt</label>
-                                        <Textarea 
-                                          placeholder="Enter detailed persona instructions and behavior guidelines..."
-                                          className="min-h-48 resize-none"
-                                          value="You are a professional screenwriter with extensive experience in film and television. Your role is to provide expert guidance on script development, character creation, dialogue writing, and story structure. Focus on industry best practices and creative storytelling techniques."
-                                        />
-                                      </div>
-                                      <div className="flex justify-between">
-                                        <Button variant="outline">
-                                          <Plus className="h-4 w-4 mr-2" />
-                                          New Persona
-                                        </Button>
-                                        <div className="flex gap-2">
-                                          <Button variant="outline">Cancel</Button>
-                                          <Button>Save Persona</Button>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </DialogContent>
-                              </Dialog>
+                              <button 
+                                className="px-2 py-1 rounded text-xs font-medium border border-dashed border-muted-foreground/50 text-muted-foreground hover:bg-muted/50 transition-colors"
+                                onClick={() => setShowPersonaManager(true)}
+                              >
+                                <Plus className="h-3 w-3" />
+                              </button>
                             </div>
                           </div>
                           <div className="border-t border-border my-1" />
@@ -516,6 +430,12 @@ const WorkflowyItem = ({
           </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
+
+      {/* Persona Manager Dialog */}
+      <PersonaManager 
+        isOpen={showPersonaManager} 
+        onClose={() => setShowPersonaManager(false)} 
+      />
 
       {/* Children */}
       {hasChildren && !isCollapsed && (
