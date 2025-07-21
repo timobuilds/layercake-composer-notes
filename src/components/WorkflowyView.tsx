@@ -234,7 +234,7 @@ const WorkflowyItem = ({
                   <CheckCircle2 className="h-3 w-3 text-green-600" />
                 ) : (
                   <Circle className={`h-2 w-2 text-muted-foreground fill-current ${
-                    hasChildren ? 'ring-2 ring-gray-300 rounded-full' : ''
+                    hasChildren ? 'border-2 border-gray-300 rounded-full' : ''
                   }`} />
                 )}
               </button>
