@@ -197,130 +197,109 @@ export const VersionHistoryDialog = ({
               <p className="text-xs text-muted-foreground">No versions saved yet.</p>
             </div>
           ) : (
-            <div className="space-y-0">
-              {/* Header */}
-              <div className="grid grid-cols-12 gap-4 p-3 border-b bg-muted/30 text-xs font-medium text-muted-foreground">
-                <div className="col-span-1"></div>
-                <div className="col-span-4">Name</div>
-                <div className="col-span-4">Modified</div>
-                <div className="col-span-3">Actions</div>
-              </div>
+            <div className="relative">
+              {/* Timeline line */}
+              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
               
-              {/* Timeline container */}
-              <div className="relative">
-                {/* Timeline line */}
-                <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-border"></div>
-                
-                {versions
-                  .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                  .map((version, index) => {
-                    const createdAt = new Date(version.createdAt);
-                    const timeAgo = formatDistance(createdAt, new Date(), { addSuffix: true });
-                    const isSelected = selectedVersions.includes(version.id);
-                    const isMergeVersion = version.name.startsWith('Merge:');
-                    const isCurrentVersion = currentProject && version.version === currentProject.currentVersion;
-                    
-                    return (
-                      <div 
-                        key={version.id} 
-                        className={`grid grid-cols-12 gap-4 items-center py-3 px-3 border-b transition-colors hover:bg-muted/20 ${
-                          isCurrentVersion 
-                            ? 'bg-blue-50 border-blue-200' 
-                            : isSelected 
-                              ? 'bg-primary/5 border-primary/20' 
-                              : ''
-                        }`}
-                      >
-                        {/* Timeline node */}
-                        <div className="col-span-1 flex justify-center relative">
-                          <div 
-                            className={`w-3 h-3 rounded-full border-2 bg-background relative z-10 cursor-pointer transition-colors ${
-                              isSelected 
-                                ? 'border-primary bg-primary' 
-                                : isCurrentVersion
-                                  ? 'border-blue-500 bg-blue-500'
-                                  : isMergeVersion
-                                    ? 'border-orange-500 bg-orange-500'
-                                    : 'border-muted-foreground hover:border-primary'
-                            }`}
-                            onClick={() => handleVersionSelect(version.id)}
-                          >
-                            {isMergeVersion && (
-                              <GitMerge className="h-2 w-2 text-white absolute top-0.5 left-0.5" />
-                            )}
-                          </div>
-                          
-                          {/* Branch indicator for merge versions */}
-                          {isMergeVersion && index < versions.length - 1 && (
-                            <div className="absolute left-1.5 top-3 w-8 h-8">
-                              <div className="absolute top-0 left-0 w-0.5 h-4 bg-border transform rotate-45 origin-bottom"></div>
-                              <div className="absolute top-2 left-2 w-0.5 h-4 bg-border transform -rotate-45 origin-top"></div>
-                            </div>
+              {versions
+                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                .map((version, index) => {
+                  const createdAt = new Date(version.createdAt);
+                  const timeAgo = formatDistance(createdAt, new Date(), { addSuffix: true });
+                  const isSelected = selectedVersions.includes(version.id);
+                  const isMergeVersion = version.name.startsWith('Merge:');
+                  const isCurrentVersion = currentProject && version.version === currentProject.currentVersion;
+                  
+                  return (
+                    <div key={version.id} className="relative flex items-start gap-4 pb-4">
+                      {/* Timeline node */}
+                      <div className="relative flex-shrink-0">
+                        <div 
+                          className={`w-3 h-3 rounded-full border-2 bg-background relative z-10 cursor-pointer transition-colors ${
+                            isSelected 
+                              ? 'border-primary bg-primary' 
+                              : isCurrentVersion
+                                ? 'border-green-500 bg-green-500 ring-2 ring-green-200'
+                                : isMergeVersion
+                                  ? 'border-orange-500 bg-orange-500'
+                                  : 'border-muted-foreground hover:border-primary'
+                          }`}
+                          onClick={() => handleVersionSelect(version.id)}
+                        >
+                          {isMergeVersion && (
+                            <GitMerge className="h-2 w-2 text-white absolute top-0.5 left-0.5" />
                           )}
                         </div>
                         
-                        {/* Version name and info */}
-                        <div className="col-span-4 space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className={`text-sm font-medium ${isCurrentVersion ? 'text-blue-700' : ''}`}>
-                              {version.name}
-                            </span>
-                            {isCurrentVersion && (
-                              <span className="bg-blue-500 text-white px-1.5 py-0.5 rounded text-xs font-medium">
-                                CURRENT
-                              </span>
-                            )}
-                            {isMergeVersion && (
-                              <GitBranch className="h-3 w-3 text-orange-500" />
-                            )}
+                        {/* Branch indicator for merge versions */}
+                        {isMergeVersion && index < versions.length - 1 && (
+                          <div className="absolute left-1.5 top-3 w-8 h-8">
+                            <div className="absolute top-0 left-0 w-0.5 h-4 bg-border transform rotate-45 origin-bottom"></div>
+                            <div className="absolute top-2 left-2 w-0.5 h-4 bg-border transform -rotate-45 origin-top"></div>
                           </div>
-                          <div className="text-xs text-muted-foreground">
-                            <span className="font-mono">v{version.version}</span>
-                            {version.description && (
-                              <div className="mt-1 flex items-center gap-1 text-muted-foreground/80">
-                                <span>›</span>
-                                <span className="truncate">{version.description}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        
-                        {/* Modified info */}
-                        <div className="col-span-4 text-xs text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            <span>{timeAgo}</span>
-                          </div>
-                          <div className="mt-1">
-                            <span>{createdAt.toLocaleDateString()} {createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                          </div>
-                        </div>
-                        
-                        {/* Actions */}
-                        <div className="col-span-3 flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleVersionSelect(version.id)}
-                            className={`text-xs h-7 ${isSelected ? 'bg-primary/10' : ''}`}
-                          >
-                            {isSelected ? 'Selected' : 'Select'}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRestore(version.id)}
-                            className="text-xs h-7"
-                            disabled={isCurrentVersion}
-                          >
-                            <RotateCcw className="h-3 w-3 mr-1" />
-                            Restore
-                          </Button>
-                        </div>
+                        )}
                       </div>
-                    );
-                  })}
-              </div>
+                      
+                      {/* Version card */}
+                      <Card className={`flex-1 border transition-colors ${
+                        isSelected 
+                          ? 'border-primary bg-primary/5' 
+                          : isCurrentVersion
+                            ? 'border-green-500 bg-green-50 ring-1 ring-green-200'
+                            : 'border-border/40'
+                      }`}>
+                        <CardHeader className="pb-2">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <CardTitle className="text-sm flex items-center gap-2">
+                                {version.name}
+                                {isCurrentVersion && (
+                                  <span className="bg-green-500 text-white px-1.5 py-0.5 rounded text-xs font-medium">
+                                    CURRENT
+                                  </span>
+                                )}
+                                {isMergeVersion && (
+                                  <GitBranch className="h-3 w-3 text-orange-500" />
+                                )}
+                              </CardTitle>
+                              <CardDescription className="flex items-center gap-1 mt-1">
+                                <span className="font-mono text-xs">v{version.version}</span>
+                                <span className="text-xs">•</span>
+                                <Calendar className="h-3 w-3" />
+                                <span className="text-xs">{timeAgo}</span>
+                              </CardDescription>
+                            </div>
+                            <div className="flex gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleVersionSelect(version.id)}
+                                className={`text-xs ${isSelected ? 'bg-primary/10' : ''}`}
+                              >
+                                {isSelected ? 'Selected' : 'Select'}
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleRestore(version.id)}
+                                className="text-xs"
+                                disabled={isCurrentVersion}
+                              >
+                                <RotateCcw className="h-3 w-3 mr-1" />
+                                Restore
+                              </Button>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        {version.description && (
+                          <CardContent className="pt-0">
+                            <p className="text-xs text-muted-foreground">{version.description}</p>
+                          </CardContent>
+                        )}
+                      </Card>
+                    </div>
+                  );
+                })}
             </div>
           )}
         </div>
