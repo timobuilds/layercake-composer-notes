@@ -230,7 +230,7 @@ const WorkflowyItem = ({
                 {node.completed ? (
                   <CheckCircle2 className="h-3 w-3 text-green-600" />
                 ) : (
-                  <Circle className="h-2 w-2 text-muted-foreground border border-muted-foreground rounded-full" />
+                  <Circle className="h-2 w-2 text-muted-foreground fill-current" />
                 )}
               </button>
             </div>
