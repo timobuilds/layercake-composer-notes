@@ -3,7 +3,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Node } from '@/types/layercake';
 import { storage, generateId } from '@/lib/storage';
-import { ChevronRight, ChevronDown, Circle, CheckCircle2, Home, Dot } from 'lucide-react';
+import { ChevronRight, ChevronDown, Circle, CheckCircle2, Home, Dot, MoreHorizontal, Plus } from 'lucide-react';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu';
 
 interface WorkflowyViewProps {
   projectId: string;
@@ -47,6 +54,7 @@ const WorkflowyItem = ({
   
   const hasChildren = children.length > 0;
   const isCollapsed = node.collapsed && hasChildren;
+  const indentLevel = level * 20; // 20px per level for cleaner indentation
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -65,6 +73,8 @@ const WorkflowyItem = ({
   const handleBulletClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (hasChildren) {
+      onToggleCollapse(node.id);
+    } else {
       onFocus(node.id);
     }
   };
@@ -80,7 +90,6 @@ const WorkflowyItem = ({
     switch (e.key) {
       case 'Enter':
         if (e.shiftKey) {
-          // Shift+Enter for new line within item
           return;
         }
         e.preventDefault();
@@ -114,94 +123,106 @@ const WorkflowyItem = ({
 
   return (
     <div className="workflowy-item">
-      <div 
-        className={`flex items-center gap-2 py-1 pl-${level * 4} hover:bg-muted/30 rounded group cursor-text`}
-        onClick={handleClick}
-        data-node-id={node.id}
-      >
-        {/* Bullet/Toggle */}
-        <div className="flex items-center gap-1">
-          {hasChildren && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleCollapse(node.id);
-              }}
-              className="p-0 h-3 w-3 hover:bg-muted rounded"
-            >
-              {isCollapsed ? (
-                <ChevronRight className="h-3 w-3" />
-              ) : (
-                <ChevronDown className="h-3 w-3" />
-              )}
-            </button>
-          )}
-          
-          <button
-            onClick={handleBulletClick}
-            className="p-0 h-4 w-4 hover:bg-muted rounded flex items-center justify-center"
+      <ContextMenu>
+        <ContextMenuTrigger>
+          <div 
+            className={`flex items-center gap-2 py-1 hover:bg-muted/30 rounded group cursor-text relative`}
+            onClick={handleClick}
+            data-node-id={node.id}
+            style={{ paddingLeft: `${indentLevel + 8}px` }}
           >
-            {node.completed ? (
-              <CheckCircle2 className="h-3 w-3 text-green-600" />
-            ) : (
-              <Dot className="h-4 w-4 text-muted-foreground" />
-            )}
-          </button>
-        </div>
+            {/* Bullet/Toggle */}
+            <div className="flex items-center gap-1 flex-shrink-0">
+              {hasChildren && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleCollapse(node.id);
+                  }}
+                  className="p-0 h-4 w-4 hover:bg-muted rounded flex items-center justify-center"
+                >
+                  {isCollapsed ? (
+                    <ChevronRight className="h-3 w-3" />
+                  ) : (
+                    <ChevronDown className="h-3 w-3" />
+                  )}
+                </button>
+              )}
+              
+              <button
+                onClick={handleBulletClick}
+                className="p-0 h-4 w-4 hover:bg-muted rounded flex items-center justify-center"
+              >
+                {node.completed ? (
+                  <CheckCircle2 className="h-3 w-3 text-green-600" />
+                ) : (
+                  <Circle className="h-2 w-2 text-muted-foreground border border-muted-foreground rounded-full" />
+                )}
+              </button>
+            </div>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          {isEditing ? (
-            <Input
-              ref={inputRef}
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
-              onBlur={handleBlur}
-              onKeyDown={handleKeyDown}
-              className="border-none shadow-none p-0 h-auto text-xs bg-transparent focus-visible:ring-0"
-              placeholder="Type something..."
-            />
-          ) : (
-            <div 
-              className={`text-xs cursor-text min-h-[1.2rem] ${
-                node.completed ? 'line-through text-muted-foreground' : ''
-              }`}
-            >
-              {node.content || (
-                <span className="text-muted-foreground italic">Click to edit</span>
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              {isEditing ? (
+                <Input
+                  ref={inputRef}
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  onBlur={handleBlur}
+                  onKeyDown={handleKeyDown}
+                  className="border-none shadow-none p-0 h-auto text-sm bg-transparent focus-visible:ring-0"
+                  placeholder="Type something..."
+                />
+              ) : (
+                <div 
+                  className={`text-sm cursor-text min-h-[1.4rem] ${
+                    node.completed ? 'line-through text-muted-foreground' : ''
+                  }`}
+                >
+                  {node.content || (
+                    <span className="text-muted-foreground italic">Click to edit</span>
+                  )}
+                </div>
               )}
             </div>
-          )}
-        </div>
 
-        {/* Actions */}
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleComplete(node.id);
-            }}
-            className="h-6 w-6 p-0"
-            title="Toggle complete"
+            {/* Three dots menu - only visible on hover */}
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0 hover:bg-accent"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </ContextMenuTrigger>
+        
+        <ContextMenuContent>
+          <ContextMenuItem onClick={() => onCreateChild(node.id, '')}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add child
+          </ContextMenuItem>
+          <ContextMenuItem onClick={() => onCreateSibling(node.id, '')}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add sibling
+          </ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem onClick={() => onToggleComplete(node.id)}>
+            <CheckCircle2 className="h-4 w-4 mr-2" />
+            {node.completed ? 'Mark incomplete' : 'Mark complete'}
+          </ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem 
+            onClick={() => onDelete(node.id)}
+            className="text-destructive focus:text-destructive"
           >
-            <CheckCircle2 className="h-3 w-3" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(node.id);
-            }}
-            className="h-6 w-6 p-0 text-destructive hover:text-destructive"
-            title="Delete item"
-          >
-            ×
-          </Button>
-        </div>
-      </div>
+            Delete
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
 
       {/* Children */}
       {hasChildren && !isCollapsed && (
@@ -390,14 +411,14 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
     <div className="workflowy-container">
       {/* Breadcrumbs */}
       {breadcrumbs.length > 0 && (
-        <div className="flex items-center gap-2 mb-4 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2 mb-6 text-sm text-muted-foreground">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setFocusedNodeId(null)}
-            className="h-6 px-2 text-xs"
+            className="h-8 px-3 text-sm"
           >
-            <Home className="h-3 w-3 mr-1" />
+            <Home className="h-4 w-4 mr-2" />
             Home
           </Button>
           {breadcrumbs.map((crumb, index) => (
@@ -407,7 +428,7 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
                 variant="ghost"
                 size="sm"
                 onClick={() => setFocusedNodeId(index === breadcrumbs.length - 1 ? null : crumb.id)}
-                className="h-6 px-2 text-xs"
+                className="h-8 px-3 text-sm"
               >
                 {crumb.content || 'Untitled'}
               </Button>
@@ -417,7 +438,7 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
       )}
 
       {/* Items */}
-      <div className="workflowy-items space-y-0">
+      <div className="workflowy-items space-y-1">
         {nodes.map((node) => (
           <WorkflowyItemContainer
             key={node.id}
@@ -438,13 +459,14 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
       </div>
 
       {/* Add new item */}
-      <div className="mt-4">
+      <div className="mt-4 ml-2">
         <Button
           variant="ghost"
           onClick={handleAddNew}
-          className="text-xs text-muted-foreground hover:text-foreground"
+          className="text-sm text-muted-foreground hover:text-foreground h-8 px-2"
         >
-          + Add new item
+          <Plus className="h-4 w-4 mr-2" />
+          Add new item
         </Button>
       </div>
     </div>
