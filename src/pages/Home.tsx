@@ -24,7 +24,7 @@ export const Home = () => {
               <img 
                 src="/lovable-uploads/ab963aa9-534b-4627-9084-44ae44b32cef.png" 
                 alt="Layercake Logo" 
-                className="h-[30px] w-[30px] object-contain"
+                className="h-[18px] w-[18px] object-contain"
               />
             </div>
             <CreateProjectDialog onProjectCreated={handleProjectCreated} />
