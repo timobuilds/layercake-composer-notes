@@ -318,8 +318,7 @@ export const PersonaManager = ({ isOpen, onClose }: PersonaManagerProps) => {
   const filteredPersonas = state.personas.filter(persona => {
     const matchesSearch = persona.name.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
                          persona.instructions.toLowerCase().includes(state.searchQuery.toLowerCase());
-    const matchesCategory = state.selectedCategory === 'All' || persona.category === state.selectedCategory;
-    return matchesSearch && matchesCategory;
+    return matchesSearch;
   });
 
   if (!isOpen) return null;
@@ -333,7 +332,7 @@ export const PersonaManager = ({ isOpen, onClose }: PersonaManagerProps) => {
       />
       
       {/* Side Panel */}
-      <div className="fixed inset-y-0 right-0 w-[900px] bg-background border-l border-border shadow-xl z-50 flex flex-col">
+      <div className="fixed inset-y-0 right-0 w-[900px] bg-background border-l border-border shadow-xl z-50 flex flex-col animate-slide-in-right">
       {/* Header */}
       <div className="flex-shrink-0 border-b border-border p-4">
         <div className="flex items-center justify-between mb-4">
@@ -360,24 +359,6 @@ export const PersonaManager = ({ isOpen, onClose }: PersonaManagerProps) => {
           >
             <Redo className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={handleExport}>
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
-          <label className="cursor-pointer">
-            <Button variant="outline" size="sm" asChild>
-              <span>
-                <Upload className="h-4 w-4 mr-2" />
-                Import
-              </span>
-            </Button>
-            <input
-              type="file"
-              accept=".json"
-              onChange={handleImport}
-              className="hidden"
-            />
-          </label>
         </div>
       </div>
 
@@ -387,30 +368,15 @@ export const PersonaManager = ({ isOpen, onClose }: PersonaManagerProps) => {
           <>
             {/* Left Panel - Persona List */}
             <div className="w-1/2 flex flex-col min-h-0 p-4 border-r border-border">
-              <div className="flex-shrink-0 space-y-4 mb-4">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Search personas..."
-                    value={state.searchQuery}
-                    onChange={(e) => setState(prev => ({ ...prev, searchQuery: e.target.value }))}
-                    className="flex-1"
-                  />
-                  <select
-                    value={state.selectedCategory}
-                    onChange={(e) => setState(prev => ({ ...prev, selectedCategory: e.target.value as PersonaCategory | 'All' }))}
-                    className="px-3 py-2 border rounded-md bg-background"
-                  >
-                    <option value="All">All Categories</option>
-                    <option value="Creative">Creative</option>
-                    <option value="Technical">Technical</option>
-                    <option value="Business">Business</option>
-                    <option value="Marketing">Marketing</option>
-                    <option value="Design">Design</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
+              <div className="flex-shrink-0 space-y-3 mb-4">
+                <Input
+                  placeholder="Search personas..."
+                  value={state.searchQuery}
+                  onChange={(e) => setState(prev => ({ ...prev, searchQuery: e.target.value }))}
+                  className="w-full"
+                />
                 
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex gap-2">
                   <Button size="sm" onClick={() => handleStartEdit()}>
                     <Plus className="h-4 w-4 mr-2" />
                     New Persona
@@ -422,11 +388,6 @@ export const PersonaManager = ({ isOpen, onClose }: PersonaManagerProps) => {
                   >
                     Templates
                   </Button>
-                  {state.selectedPersonas.length > 0 && (
-                    <Button size="sm" variant="destructive" onClick={handleBulkDelete}>
-                      Delete Selected ({state.selectedPersonas.length})
-                    </Button>
-                  )}
                 </div>
               </div>
 
@@ -435,12 +396,10 @@ export const PersonaManager = ({ isOpen, onClose }: PersonaManagerProps) => {
               ) : (
                 <PersonaList
                   personas={filteredPersonas}
-                  selectedPersonas={state.selectedPersonas}
                   onPersonaSelect={(persona) => setState(prev => ({ ...prev, selectedPersona: persona }))}
                   onPersonaEdit={handleStartEdit}
                   onPersonaDelete={handleDeletePersona}
                   onPersonaDuplicate={handleDuplicatePersona}
-                  onSelectionChange={(ids) => setState(prev => ({ ...prev, selectedPersonas: ids }))}
                 />
               )}
             </div>
