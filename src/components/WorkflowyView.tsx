@@ -260,7 +260,12 @@ const WorkflowyItem = ({
                           <div className="px-2 py-1">
                             <label className="text-xs text-muted-foreground mb-1 block">Personas</label>
                             <div className="flex flex-wrap gap-1">
-                              <div className="group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all" style={{ backgroundColor: 'hsl(var(--persona-blue))' }}>
+                              <button 
+                                className="group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all cursor-pointer"
+                                style={{ backgroundColor: 'hsl(var(--persona-blue))' }}
+                                onClick={() => setShowPersonaManager(true)}
+                                title="Edit personas"
+                              >
                                 <span>Screenwriter</span>
                                 <button 
                                   className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
@@ -269,8 +274,13 @@ const WorkflowyItem = ({
                                 >
                                   <X className="h-2.5 w-2.5" />
                                 </button>
-                              </div>
-                              <div className="group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all" style={{ backgroundColor: 'hsl(var(--persona-green))' }}>
+                              </button>
+                              <button 
+                                className="group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all cursor-pointer"
+                                style={{ backgroundColor: 'hsl(var(--persona-green))' }}
+                                onClick={() => setShowPersonaManager(true)}
+                                title="Edit personas"
+                              >
                                 <span>Editor</span>
                                 <button 
                                   className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
@@ -279,8 +289,13 @@ const WorkflowyItem = ({
                                 >
                                   <X className="h-2.5 w-2.5" />
                                 </button>
-                              </div>
-                              <div className="group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all" style={{ backgroundColor: 'hsl(var(--persona-yellow))' }}>
+                              </button>
+                              <button 
+                                className="group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all cursor-pointer"
+                                style={{ backgroundColor: 'hsl(var(--persona-yellow))' }}
+                                onClick={() => setShowPersonaManager(true)}
+                                title="Edit personas"
+                              >
                                 <span>Director</span>
                                 <button 
                                   className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
@@ -289,8 +304,13 @@ const WorkflowyItem = ({
                                 >
                                   <X className="h-2.5 w-2.5" />
                                 </button>
-                              </div>
-                              <div className="group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all" style={{ backgroundColor: 'hsl(var(--persona-brown))' }}>
+                              </button>
+                              <button 
+                                className="group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all cursor-pointer"
+                                style={{ backgroundColor: 'hsl(var(--persona-brown))' }}
+                                onClick={() => setShowPersonaManager(true)}
+                                title="Edit personas"
+                              >
                                 <span>Producer</span>
                                 <button 
                                   className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
@@ -299,8 +319,13 @@ const WorkflowyItem = ({
                                 >
                                   <X className="h-2.5 w-2.5" />
                                 </button>
-                              </div>
-                              <div className="group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all" style={{ backgroundColor: 'hsl(var(--persona-purple))' }}>
+                              </button>
+                              <button 
+                                className="group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all cursor-pointer"
+                                style={{ backgroundColor: 'hsl(var(--persona-purple))' }}
+                                onClick={() => setShowPersonaManager(true)}
+                                title="Edit personas"
+                              >
                                 <span>Actor</span>
                                 <button 
                                   className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
@@ -309,7 +334,7 @@ const WorkflowyItem = ({
                                 >
                                   <X className="h-2.5 w-2.5" />
                                 </button>
-                              </div>
+                              </button>
                               <button 
                                 className="px-2 py-1 rounded text-xs font-medium border border-dashed border-muted-foreground/50 text-muted-foreground hover:bg-muted/50 transition-colors"
                                 onClick={() => setShowPersonaManager(true)}
