@@ -58,6 +58,13 @@
     --sidebar-accent-foreground: 0 0% 9%;
     --sidebar-border: 0 0% 90%;
     --sidebar-ring: 215 100% 60%;
+
+    /* Persona colors */
+    --persona-blue: 215 100% 60%;
+    --persona-green: 142 76% 36%;
+    --persona-yellow: 45 93% 47%;
+    --persona-brown: 25 50% 35%;
+    --persona-purple: 271 81% 56%;
   }
 
   .dark {

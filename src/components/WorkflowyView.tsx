@@ -12,7 +12,6 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface WorkflowyViewProps {
   projectId: string;
@@ -254,26 +253,31 @@ const WorkflowyItem = ({
                   onClick={(e) => e.stopPropagation()}
                 >
                    <div className="space-y-1">
-                     {hasChildren && (
-                       <>
-                         <div className="px-2 py-1">
-                           <label className="text-xs text-muted-foreground mb-1 block">Personas</label>
-                           <Select defaultValue="1">
-                             <SelectTrigger className="w-full h-6 text-xs">
-                               <SelectValue />
-                             </SelectTrigger>
-                             <SelectContent>
-                               <SelectItem value="1">1 persona</SelectItem>
-                               <SelectItem value="2">2 personas</SelectItem>
-                               <SelectItem value="3">3 personas</SelectItem>
-                               <SelectItem value="4">4 personas</SelectItem>
-                               <SelectItem value="5">5 personas</SelectItem>
-                             </SelectContent>
-                           </Select>
-                         </div>
-                         <div className="border-t border-border my-1" />
-                       </>
-                     )}
+                      {hasChildren && (
+                        <>
+                          <div className="px-2 py-1">
+                            <label className="text-xs text-muted-foreground mb-1 block">Personas</label>
+                            <div className="flex flex-wrap gap-1">
+                              <div className="px-2 py-1 rounded text-xs font-medium text-white" style={{ backgroundColor: 'hsl(var(--persona-blue))' }}>
+                                Screenwriter
+                              </div>
+                              <div className="px-2 py-1 rounded text-xs font-medium text-white" style={{ backgroundColor: 'hsl(var(--persona-green))' }}>
+                                Editor
+                              </div>
+                              <div className="px-2 py-1 rounded text-xs font-medium text-white" style={{ backgroundColor: 'hsl(var(--persona-yellow))' }}>
+                                Director
+                              </div>
+                              <div className="px-2 py-1 rounded text-xs font-medium text-white" style={{ backgroundColor: 'hsl(var(--persona-brown))' }}>
+                                Producer
+                              </div>
+                              <div className="px-2 py-1 rounded text-xs font-medium text-white" style={{ backgroundColor: 'hsl(var(--persona-purple))' }}>
+                                Actor
+                              </div>
+                            </div>
+                          </div>
+                          <div className="border-t border-border my-1" />
+                        </>
+                      )}
                      <button 
                        className="flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent rounded text-left"
                        onClick={() => onCopyTree(node.id)}
