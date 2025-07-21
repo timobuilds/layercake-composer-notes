@@ -19,12 +19,12 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-medium">{project.name}</h3>
             <span className="text-xs text-muted-foreground flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {timeAgo}
-            </span>
-            <span className="text-xs text-muted-foreground flex items-center gap-1">
               <GitFork className="h-3 w-3" />
               v{project.currentVersion}
+            </span>
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              {timeAgo}
             </span>
           </div>
         </CardContent>
