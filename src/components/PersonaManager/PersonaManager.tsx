@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Download, Upload, Undo, Redo } from 'lucide-react';
+import { Plus, Download, Upload, Undo, Redo, X } from 'lucide-react';
 import { PersonaList } from './PersonaList';
 import { PersonaEditor } from './PersonaEditor';
 import { PersonaTemplates } from './PersonaTemplates';
@@ -323,121 +322,137 @@ export const PersonaManager = ({ isOpen, onClose }: PersonaManagerProps) => {
     return matchesSearch && matchesCategory;
   });
 
+  if (!isOpen) return null;
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-7xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader className="flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <DialogTitle>Prompt Persona Manager</DialogTitle>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleUndo}
-                disabled={undoStack.length <= 1}
-              >
-                <Undo className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRedo}
-                disabled={redoStack.length === 0}
-              >
-                <Redo className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleExport}>
-                <Download className="h-4 w-4 mr-2" />
-                Export
-              </Button>
-              <label className="cursor-pointer">
-                <Button variant="outline" size="sm" asChild>
-                  <span>
-                    <Upload className="h-4 w-4 mr-2" />
-                    Import
-                  </span>
-                </Button>
-                <input
-                  type="file"
-                  accept=".json"
-                  onChange={handleImport}
-                  className="hidden"
-                />
-              </label>
-            </div>
-          </div>
-        </DialogHeader>
+    <>
+      {/* Overlay */}
+      <div 
+        className="fixed inset-0 bg-black/20 z-40" 
+        onClick={onClose}
+      />
+      
+      {/* Side Panel */}
+      <div className="fixed inset-y-0 right-0 w-[900px] bg-background border-l border-border shadow-xl z-50 flex flex-col">
+      {/* Header */}
+      <div className="flex-shrink-0 border-b border-border p-4">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-medium">Prompt Persona Manager</h2>
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleUndo}
+            disabled={undoStack.length <= 1}
+          >
+            <Undo className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRedo}
+            disabled={redoStack.length === 0}
+          >
+            <Redo className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExport}>
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+          <label className="cursor-pointer">
+            <Button variant="outline" size="sm" asChild>
+              <span>
+                <Upload className="h-4 w-4 mr-2" />
+                Import
+              </span>
+            </Button>
+            <input
+              type="file"
+              accept=".json"
+              onChange={handleImport}
+              className="hidden"
+            />
+          </label>
+        </div>
+      </div>
 
-        <div className="flex flex-1 gap-6 overflow-hidden min-h-0">
-          {!state.isEditing ? (
-            <>
-              {/* Left Panel - Persona List */}
-              <div className="w-1/2 flex flex-col min-h-0">
-                <div className="flex-shrink-0 space-y-4 mb-4">
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Search personas..."
-                      value={state.searchQuery}
-                      onChange={(e) => setState(prev => ({ ...prev, searchQuery: e.target.value }))}
-                      className="flex-1"
-                    />
-                    <select
-                      value={state.selectedCategory}
-                      onChange={(e) => setState(prev => ({ ...prev, selectedCategory: e.target.value as PersonaCategory | 'All' }))}
-                      className="px-3 py-2 border rounded-md bg-background"
-                    >
-                      <option value="All">All Categories</option>
-                      <option value="Creative">Creative</option>
-                      <option value="Technical">Technical</option>
-                      <option value="Business">Business</option>
-                      <option value="Marketing">Marketing</option>
-                      <option value="Design">Design</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                  
-                  <div className="flex gap-2 flex-wrap">
-                    <Button size="sm" onClick={() => handleStartEdit()}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      New Persona
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => setState(prev => ({ ...prev, showTemplates: !prev.showTemplates }))}
-                    >
-                      Templates
-                    </Button>
-                    {state.selectedPersonas.length > 0 && (
-                      <Button size="sm" variant="destructive" onClick={handleBulkDelete}>
-                        Delete Selected ({state.selectedPersonas.length})
-                      </Button>
-                    )}
-                  </div>
-                </div>
-
-                {state.showTemplates ? (
-                  <PersonaTemplates onSelectTemplate={handleStartEdit} />
-                ) : (
-                  <PersonaList
-                    personas={filteredPersonas}
-                    selectedPersonas={state.selectedPersonas}
-                    onPersonaSelect={(persona) => setState(prev => ({ ...prev, selectedPersona: persona }))}
-                    onPersonaEdit={handleStartEdit}
-                    onPersonaDelete={handleDeletePersona}
-                    onPersonaDuplicate={handleDuplicatePersona}
-                    onSelectionChange={(ids) => setState(prev => ({ ...prev, selectedPersonas: ids }))}
+      {/* Content */}
+      <div className="flex flex-1 overflow-hidden min-h-0">
+        {!state.isEditing ? (
+          <>
+            {/* Left Panel - Persona List */}
+            <div className="w-1/2 flex flex-col min-h-0 p-4 border-r border-border">
+              <div className="flex-shrink-0 space-y-4 mb-4">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Search personas..."
+                    value={state.searchQuery}
+                    onChange={(e) => setState(prev => ({ ...prev, searchQuery: e.target.value }))}
+                    className="flex-1"
                   />
-                )}
+                  <select
+                    value={state.selectedCategory}
+                    onChange={(e) => setState(prev => ({ ...prev, selectedCategory: e.target.value as PersonaCategory | 'All' }))}
+                    className="px-3 py-2 border rounded-md bg-background"
+                  >
+                    <option value="All">All Categories</option>
+                    <option value="Creative">Creative</option>
+                    <option value="Technical">Technical</option>
+                    <option value="Business">Business</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Design">Design</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                
+                <div className="flex gap-2 flex-wrap">
+                  <Button size="sm" onClick={() => handleStartEdit()}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Persona
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => setState(prev => ({ ...prev, showTemplates: !prev.showTemplates }))}
+                  >
+                    Templates
+                  </Button>
+                  {state.selectedPersonas.length > 0 && (
+                    <Button size="sm" variant="destructive" onClick={handleBulkDelete}>
+                      Delete Selected ({state.selectedPersonas.length})
+                    </Button>
+                  )}
+                </div>
               </div>
 
-              {/* Right Panel - Preview */}
-              <div className="w-1/2">
-                <PersonaPreview persona={state.selectedPersona} />
-              </div>
-            </>
-          ) : (
-            /* Editor Mode - Full Width */
+              {state.showTemplates ? (
+                <PersonaTemplates onSelectTemplate={handleStartEdit} />
+              ) : (
+                <PersonaList
+                  personas={filteredPersonas}
+                  selectedPersonas={state.selectedPersonas}
+                  onPersonaSelect={(persona) => setState(prev => ({ ...prev, selectedPersona: persona }))}
+                  onPersonaEdit={handleStartEdit}
+                  onPersonaDelete={handleDeletePersona}
+                  onPersonaDuplicate={handleDuplicatePersona}
+                  onSelectionChange={(ids) => setState(prev => ({ ...prev, selectedPersonas: ids }))}
+                />
+              )}
+            </div>
+
+            {/* Right Panel - Preview */}
+            <div className="w-1/2 p-4">
+              <PersonaPreview persona={state.selectedPersona} />
+            </div>
+          </>
+        ) : (
+          /* Editor Mode - Full Width */
+          <div className="flex-1 p-4">
             <PersonaEditor
               formData={formData}
               setFormData={setFormData}
@@ -446,9 +461,10 @@ export const PersonaManager = ({ isOpen, onClose }: PersonaManagerProps) => {
               isEditing={!!state.selectedPersona}
               onDirtyChange={(isDirty) => setState(prev => ({ ...prev, isDirty }))}
             />
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+          </div>
+        )}
+      </div>
+      </div>
+    </>
   );
 };
