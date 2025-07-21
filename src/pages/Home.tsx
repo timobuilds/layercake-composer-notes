@@ -43,7 +43,7 @@ export const Home = () => {
               <button
                 key={persona}
                 draggable
-                className={`group/persona px-3 py-2 rounded text-sm font-medium text-white flex items-center gap-2 hover:bg-opacity-80 transition-all cursor-pointer ${
+                className={`group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all cursor-pointer border border-white/20 ${
                   draggedPersona === persona ? 'opacity-50' : ''
                 } ${
                   dragOverPersona === persona ? 'scale-105 shadow-lg' : ''
@@ -88,7 +88,7 @@ export const Home = () => {
               >
                 <span>{persona}</span>
                 <button 
-                  className="opacity-0 group-hover/persona:opacity-100 hover:bg-white/20 rounded-sm p-0.5 transition-all"
+                  className="hover:bg-white/20 rounded-sm p-0.5 transition-all"
                   onClick={(e) => e.stopPropagation()}
                   title="Remove persona"
                 >
@@ -97,7 +97,7 @@ export const Home = () => {
               </button>
             ))}
             <button 
-              className="px-3 py-2 rounded text-sm font-medium border border-dashed border-muted-foreground/50 text-muted-foreground hover:bg-muted/50 transition-colors"
+              className="px-2 py-1 rounded text-xs font-medium border border-dashed border-muted-foreground/50 text-muted-foreground hover:bg-muted/50 transition-colors"
               onClick={() => setShowPersonaManager(true)}
             >
               + Add Persona
