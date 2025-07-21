@@ -171,14 +171,12 @@ const WorkflowyItem = ({
     
     const draggedNodeId = e.dataTransfer.getData('text/plain');
     if (draggedNodeId && draggedNodeId !== node.id) {
-      if (dragPosition === 'before' || dragPosition === 'after') {
-        // Insert as sibling before/after this node
-        const allNodes = storage.getNodes();
-        const currentNode = allNodes.find(n => n.id === node.id);
-        if (currentNode) {
-          storage.updateNode(draggedNodeId, { parentId: currentNode.parentId });
-          // TODO: We could add ordering logic here if needed
-        }
+      if (dragPosition === 'before') {
+        // Insert as sibling before this node
+        storage.insertNodeAt(draggedNodeId, node.id, 'before');
+      } else if (dragPosition === 'after') {
+        // Insert as sibling after this node
+        storage.insertNodeAt(draggedNodeId, node.id, 'after');
       } else {
         // Move the dragged node to be a child of this node
         storage.updateNode(draggedNodeId, { parentId: node.id });

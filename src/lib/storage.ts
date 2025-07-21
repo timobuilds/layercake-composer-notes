@@ -40,6 +40,14 @@ export const storage = {
 
   addNode(node: Node): void {
     const nodes = this.getNodes();
+    
+    // Auto-assign order if not provided
+    if (node.order === undefined) {
+      const siblings = nodes.filter(n => n.parentId === node.parentId);
+      const maxOrder = siblings.reduce((max, sibling) => Math.max(max, sibling.order || 0), 0);
+      node.order = maxOrder + 1000;
+    }
+    
     nodes.push(node);
     this.saveNodes(nodes);
   },
@@ -78,11 +86,58 @@ export const storage = {
   },
 
   getChildNodes(parentId: string): Node[] {
-    return this.getNodes().filter(n => n.parentId === parentId);
+    return this.getNodes()
+      .filter(n => n.parentId === parentId)
+      .sort((a, b) => (a.order || 0) - (b.order || 0));
   },
 
   getRootNodes(projectId: string): Node[] {
-    return this.getNodes().filter(n => n.projectId === projectId && !n.parentId);
+    return this.getNodes()
+      .filter(n => n.projectId === projectId && !n.parentId)
+      .sort((a, b) => (a.order || 0) - (b.order || 0));
+  },
+
+  insertNodeAt(nodeId: string, targetNodeId: string, position: 'before' | 'after'): void {
+    const nodes = this.getNodes();
+    const nodeToMove = nodes.find(n => n.id === nodeId);
+    const targetNode = nodes.find(n => n.id === targetNodeId);
+    
+    if (!nodeToMove || !targetNode) return;
+
+    // Get siblings of the target node
+    const siblings = this.getChildNodes(targetNode.parentId || '').filter(n => n.id !== nodeId);
+    
+    // Find target position
+    const targetIndex = siblings.findIndex(n => n.id === targetNodeId);
+    const insertIndex = position === 'before' ? targetIndex : targetIndex + 1;
+    
+    // Update the moved node's parent and calculate new order
+    const newOrder = this.calculateOrderForPosition(siblings, insertIndex);
+    
+    this.updateNode(nodeId, { 
+      parentId: targetNode.parentId,
+      order: newOrder 
+    });
+    
+    // Reorder all siblings to maintain clean ordering
+    this.reorderSiblings(targetNode.parentId || '');
+  },
+
+  calculateOrderForPosition(siblings: Node[], insertIndex: number): number {
+    if (siblings.length === 0) return 1000;
+    if (insertIndex === 0) return (siblings[0].order || 1000) - 1000;
+    if (insertIndex >= siblings.length) return (siblings[siblings.length - 1].order || 1000) + 1000;
+    
+    const prevOrder = siblings[insertIndex - 1].order || 1000;
+    const nextOrder = siblings[insertIndex].order || 1000;
+    return prevOrder + (nextOrder - prevOrder) / 2;
+  },
+
+  reorderSiblings(parentId: string | null): void {
+    const siblings = this.getChildNodes(parentId || '');
+    siblings.forEach((node, index) => {
+      this.updateNode(node.id, { order: (index + 1) * 1000 });
+    });
   },
 
   // Versions

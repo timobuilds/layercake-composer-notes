@@ -24,6 +24,7 @@ export interface Node {
   completed?: boolean; // For marking items as done
   collapsed?: boolean; // For collapsing branches
   locked?: boolean; // For locking individual nodes
+  order?: number; // For ordering nodes within the same parent
   createdAt: string;
 }
 
