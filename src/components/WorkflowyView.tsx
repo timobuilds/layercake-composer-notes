@@ -12,6 +12,7 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface WorkflowyViewProps {
   projectId: string;
@@ -252,32 +253,52 @@ const WorkflowyItem = ({
                   align="start"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="space-y-1">
-                    <button 
-                      className="flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent rounded text-left"
-                      onClick={() => onCopyTree(node.id)}
-                    >
-                      <Copy className="h-4 w-4 mr-2" />
-                      Copy tree
-                    </button>
-                    <button 
-                      className="flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent rounded text-left"
-                      onClick={() => onToggleLock(node.id)}
-                    >
-                      {node.locked ? (
-                        <Unlock className="h-4 w-4 mr-2 text-red-500" />
-                      ) : (
-                        <Lock className="h-4 w-4 mr-2" />
-                      )}
-                      {node.locked ? 'Unlock' : 'Lock'}
-                    </button>
-                    <button 
-                      className={`flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent rounded text-left ${node.locked ? 'opacity-50 cursor-not-allowed' : 'text-destructive'}`}
-                      onClick={() => !node.locked && onDelete(node.id)}
-                      disabled={node.locked}
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
+                   <div className="space-y-1">
+                     {hasChildren && (
+                       <>
+                         <div className="px-2 py-1">
+                           <label className="text-xs text-muted-foreground mb-1 block">Personas</label>
+                           <Select defaultValue="1">
+                             <SelectTrigger className="w-full h-6 text-xs">
+                               <SelectValue />
+                             </SelectTrigger>
+                             <SelectContent>
+                               <SelectItem value="1">1 persona</SelectItem>
+                               <SelectItem value="2">2 personas</SelectItem>
+                               <SelectItem value="3">3 personas</SelectItem>
+                               <SelectItem value="4">4 personas</SelectItem>
+                               <SelectItem value="5">5 personas</SelectItem>
+                             </SelectContent>
+                           </Select>
+                         </div>
+                         <div className="border-t border-border my-1" />
+                       </>
+                     )}
+                     <button 
+                       className="flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent rounded text-left"
+                       onClick={() => onCopyTree(node.id)}
+                     >
+                       <Copy className="h-4 w-4 mr-2" />
+                       Copy tree
+                     </button>
+                     <button 
+                       className="flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent rounded text-left"
+                       onClick={() => onToggleLock(node.id)}
+                     >
+                       {node.locked ? (
+                         <Unlock className="h-4 w-4 mr-2 text-red-500" />
+                       ) : (
+                         <Lock className="h-4 w-4 mr-2" />
+                       )}
+                       {node.locked ? 'Unlock' : 'Lock'}
+                     </button>
+                     <button 
+                       className={`flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent rounded text-left ${node.locked ? 'opacity-50 cursor-not-allowed' : 'text-destructive'}`}
+                       onClick={() => !node.locked && onDelete(node.id)}
+                       disabled={node.locked}
+                     >
+                       <Trash2 className="h-4 w-4 mr-2" />
+                       Delete
                     </button>
                     <div className="border-t my-1"></div>
                     <div className="flex items-center px-2 py-1.5 text-xs text-muted-foreground">

@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { WorkflowyView } from '@/components/WorkflowyView';
 import { VersionHistoryDialog } from '@/components/VersionHistoryDialog';
 import { storage, generateId } from '@/lib/storage';
@@ -17,7 +16,6 @@ export const ProjectView = () => {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [isVersionDialogOpen, setIsVersionDialogOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [personaCount, setPersonaCount] = useState('1');
 
   useEffect(() => {
     if (projectId) {
@@ -100,19 +98,6 @@ export const ProjectView = () => {
               >
                 {nodes.length} nodes
               </span>
-              <span>•</span>
-              <Select value={personaCount} onValueChange={setPersonaCount}>
-                <SelectTrigger className="w-20 h-6 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1 persona</SelectItem>
-                  <SelectItem value="2">2 personas</SelectItem>
-                  <SelectItem value="3">3 personas</SelectItem>
-                  <SelectItem value="4">4 personas</SelectItem>
-                  <SelectItem value="5">5 personas</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
             
              <div className="flex gap-2">
