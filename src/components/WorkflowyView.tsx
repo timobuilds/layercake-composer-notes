@@ -260,54 +260,54 @@ const WorkflowyItem = ({
                           <div className="px-2 py-1">
                             <label className="text-xs text-muted-foreground mb-1 block">Personas</label>
                             <div className="flex flex-wrap gap-1">
-                              <div className="px-3 py-1.5 rounded-md text-sm font-medium bg-primary text-primary-foreground flex items-center gap-2 hover:bg-primary/90 transition-colors">
+                              <div className="group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all" style={{ backgroundColor: 'hsl(var(--persona-blue))' }}>
                                 <span>Screenwriter</span>
                                 <button 
                                   className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
                                   onClick={(e) => e.stopPropagation()}
                                   title="Remove persona"
                                 >
-                                  <X className="h-3 w-3" />
+                                  <X className="h-2.5 w-2.5" />
                                 </button>
                               </div>
-                              <div className="px-3 py-1.5 rounded-md text-sm font-medium bg-primary text-primary-foreground flex items-center gap-2 hover:bg-primary/90 transition-colors">
+                              <div className="group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all" style={{ backgroundColor: 'hsl(var(--persona-green))' }}>
                                 <span>Editor</span>
                                 <button 
                                   className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
                                   onClick={(e) => e.stopPropagation()}
                                   title="Remove persona"
                                 >
-                                  <X className="h-3 w-3" />
+                                  <X className="h-2.5 w-2.5" />
                                 </button>
                               </div>
-                              <div className="px-3 py-1.5 rounded-md text-sm font-medium bg-primary text-primary-foreground flex items-center gap-2 hover:bg-primary/90 transition-colors">
+                              <div className="group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all" style={{ backgroundColor: 'hsl(var(--persona-yellow))' }}>
                                 <span>Director</span>
                                 <button 
                                   className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
                                   onClick={(e) => e.stopPropagation()}
                                   title="Remove persona"
                                 >
-                                  <X className="h-3 w-3" />
+                                  <X className="h-2.5 w-2.5" />
                                 </button>
                               </div>
-                              <div className="px-3 py-1.5 rounded-md text-sm font-medium bg-primary text-primary-foreground flex items-center gap-2 hover:bg-primary/90 transition-colors">
+                              <div className="group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all" style={{ backgroundColor: 'hsl(var(--persona-brown))' }}>
                                 <span>Producer</span>
                                 <button 
                                   className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
                                   onClick={(e) => e.stopPropagation()}
                                   title="Remove persona"
                                 >
-                                  <X className="h-3 w-3" />
+                                  <X className="h-2.5 w-2.5" />
                                 </button>
                               </div>
-                              <div className="px-3 py-1.5 rounded-md text-sm font-medium bg-primary text-primary-foreground flex items-center gap-2 hover:bg-primary/90 transition-colors">
+                              <div className="group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all" style={{ backgroundColor: 'hsl(var(--persona-purple))' }}>
                                 <span>Actor</span>
                                 <button 
                                   className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
                                   onClick={(e) => e.stopPropagation()}
                                   title="Remove persona"
                                 >
-                                  <X className="h-3 w-3" />
+                                  <X className="h-2.5 w-2.5" />
                                 </button>
                               </div>
                               <button 
