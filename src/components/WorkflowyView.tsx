@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Node } from '@/types/layercake';
 import { storage, generateId } from '@/lib/storage';
-import { ChevronRight, ChevronDown, Circle, CheckCircle2, Home } from 'lucide-react';
+import { ChevronRight, ChevronDown, Circle, CheckCircle2, Home, Dot } from 'lucide-react';
 
 interface WorkflowyViewProps {
   projectId: string;
@@ -144,7 +144,7 @@ const WorkflowyItem = ({
             {node.completed ? (
               <CheckCircle2 className="h-3 w-3 text-green-600" />
             ) : (
-              <Circle className="h-2 w-2 text-muted-foreground" />
+              <Dot className="h-2 w-2 text-muted-foreground" />
             )}
           </button>
         </div>
