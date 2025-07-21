@@ -60,22 +60,16 @@ export const ProjectView = () => {
         {/* Header */}
         <div className="border-b border-border pb-3 mb-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Link to="/">
-                <Button variant="outline" size="sm" className="text-xs">
-                  <ArrowLeft className="h-3 w-3 mr-1" />
-                  Back
-                </Button>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Link to="/" className="hover:text-foreground transition-colors">
+                Projects
               </Link>
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-muted-foreground" />
-                 <div>
-                   <h1 className="text-lg font-medium">{project.name}</h1>
-                   <p className="text-xs text-muted-foreground">
-                     v{project.currentVersion} • {nodes.length} nodes
-                   </p>
-                 </div>
-              </div>
+              <span>›</span>
+              <span className="text-foreground font-medium">{project.name}</span>
+              <span>•</span>
+              <span>v{project.currentVersion}</span>
+              <span>•</span>
+              <span>{nodes.length} nodes</span>
             </div>
             
              <div className="flex gap-2">
