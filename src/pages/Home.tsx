@@ -21,7 +21,11 @@ export const Home = () => {
         <div className="border-b border-border pb-4 mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-medium object-scale-down">Layercake</h1>
+              <img 
+                src="/lovable-uploads/ab963aa9-534b-4627-9084-44ae44b32cef.png" 
+                alt="Layercake Logo" 
+                className="h-[30px] w-[30px] object-contain"
+              />
             </div>
             <CreateProjectDialog onProjectCreated={handleProjectCreated} />
           </div>
