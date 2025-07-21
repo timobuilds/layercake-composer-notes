@@ -263,7 +263,7 @@ const WorkflowyItem = ({
                               <div className="group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all" style={{ backgroundColor: 'hsl(var(--persona-blue))' }}>
                                 <span>Screenwriter</span>
                                 <button 
-                                  className="opacity-0 group-hover/persona:opacity-100 hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-opacity"
+                                  className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
                                   onClick={(e) => e.stopPropagation()}
                                   title="Remove persona"
                                 >
@@ -273,7 +273,7 @@ const WorkflowyItem = ({
                               <div className="group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all" style={{ backgroundColor: 'hsl(var(--persona-green))' }}>
                                 <span>Editor</span>
                                 <button 
-                                  className="opacity-0 group-hover/persona:opacity-100 hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-opacity"
+                                  className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
                                   onClick={(e) => e.stopPropagation()}
                                   title="Remove persona"
                                 >
@@ -283,7 +283,7 @@ const WorkflowyItem = ({
                               <div className="group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all" style={{ backgroundColor: 'hsl(var(--persona-yellow))' }}>
                                 <span>Director</span>
                                 <button 
-                                  className="opacity-0 group-hover/persona:opacity-100 hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-opacity"
+                                  className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
                                   onClick={(e) => e.stopPropagation()}
                                   title="Remove persona"
                                 >
@@ -293,7 +293,7 @@ const WorkflowyItem = ({
                               <div className="group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all" style={{ backgroundColor: 'hsl(var(--persona-brown))' }}>
                                 <span>Producer</span>
                                 <button 
-                                  className="opacity-0 group-hover/persona:opacity-100 hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-opacity"
+                                  className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
                                   onClick={(e) => e.stopPropagation()}
                                   title="Remove persona"
                                 >
@@ -303,7 +303,7 @@ const WorkflowyItem = ({
                               <div className="group/persona px-2 py-1 rounded text-xs font-medium text-white flex items-center gap-1 hover:bg-opacity-80 transition-all" style={{ backgroundColor: 'hsl(var(--persona-purple))' }}>
                                 <span>Actor</span>
                                 <button 
-                                  className="opacity-0 group-hover/persona:opacity-100 hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-opacity"
+                                  className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
                                   onClick={(e) => e.stopPropagation()}
                                   title="Remove persona"
                                 >
