@@ -33,8 +33,7 @@ export const VersionHistoryDialog = ({ projectId, onVersionRestored }: VersionHi
     }}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="text-xs">
-          <History className="h-3 w-3 mr-1" />
-          History
+          <History className="h-3 w-3" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px] max-h-[600px]">
