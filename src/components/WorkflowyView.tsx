@@ -221,7 +221,7 @@ const WorkflowyItem = ({
       <ContextMenu>
         <ContextMenuTrigger>
           <div 
-            className={`flex items-center gap-2 py-1 hover:bg-muted/30 rounded group cursor-pointer relative transition-colors w-full ${
+            className={`flex items-center gap-2 py-1 hover:bg-muted/30 rounded group cursor-pointer relative transition-colors ${
               isDragOver && dragPosition === 'child' ? 'bg-primary/10 border-l-4 border-primary' : ''
             }`}
             onClick={handleClick}
@@ -542,35 +542,14 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
     const allNodes = storage.getNodes();
     const node = allNodes.find(n => n.id === nodeId);
     if (node) {
-      // Get siblings to determine the correct order
-      const siblings = storage.getChildNodes(node.parentId || '');
-      const currentIndex = siblings.findIndex(s => s.id === nodeId);
-      
-      // Calculate order for the new node (place it right after current node)
-      let newOrder: number;
-      if (currentIndex < siblings.length - 1) {
-        // Insert between current and next sibling
-        const currentOrder = node.order || 0;
-        const nextOrder = siblings[currentIndex + 1].order || 0;
-        newOrder = currentOrder + (nextOrder - currentOrder) / 2;
-      } else {
-        // Add at the end
-        const currentOrder = node.order || 0;
-        newOrder = currentOrder + 1000;
-      }
-
       const newNode: Node = {
         id: generateId(),
         projectId,
         parentId: node.parentId,
         content,
-        order: newOrder,
         createdAt: new Date().toISOString(),
       };
-      
       storage.addNode(newNode);
-      // Reorder siblings to maintain clean ordering
-      storage.reorderSiblings(node.parentId);
       loadNodes();
       
       // Focus the new node for immediate editing
