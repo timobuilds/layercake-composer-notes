@@ -36,8 +36,7 @@ export const CreateVersionDialog = ({ projectId, onVersionCreated }: CreateVersi
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="text-xs">
-          <GitBranch className="h-3 w-3 mr-1" />
-          Save Version
+          <GitBranch className="h-3 w-3" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
