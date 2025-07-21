@@ -15,6 +15,7 @@ export const ProjectView = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const [project, setProject] = useState<Project | null>(null);
   const [nodes, setNodes] = useState<Node[]>([]);
+  const [isVersionDialogOpen, setIsVersionDialogOpen] = useState(false);
 
   useEffect(() => {
     if (projectId) {
@@ -67,7 +68,12 @@ export const ProjectView = () => {
               <span>›</span>
               <span className="text-foreground font-medium">{project.name}</span>
               <span>•</span>
-              <span>v{project.currentVersion}</span>
+               <span 
+                 className="cursor-pointer hover:text-foreground transition-colors"
+                 onClick={() => setIsVersionDialogOpen(true)}
+               >
+                 v{project.currentVersion}
+               </span>
               <span>•</span>
               <span>{nodes.length} nodes</span>
             </div>
@@ -77,10 +83,12 @@ export const ProjectView = () => {
                  projectId={projectId!} 
                  onVersionCreated={handleVersionCreated}
                />
-               <VersionHistoryDialog 
-                 projectId={projectId!} 
-                 onVersionRestored={loadNodes}
-               />
+                <VersionHistoryDialog 
+                  projectId={projectId!} 
+                  onVersionRestored={loadNodes}
+                  isOpen={isVersionDialogOpen}
+                  onOpenChange={setIsVersionDialogOpen}
+                />
              </div>
           </div>
         </div>

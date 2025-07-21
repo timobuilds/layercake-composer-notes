@@ -10,11 +10,21 @@ import { History, RotateCcw, Calendar } from 'lucide-react';
 interface VersionHistoryDialogProps {
   projectId: string;
   onVersionRestored: () => void;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export const VersionHistoryDialog = ({ projectId, onVersionRestored }: VersionHistoryDialogProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+export const VersionHistoryDialog = ({ 
+  projectId, 
+  onVersionRestored,
+  isOpen: externalIsOpen,
+  onOpenChange: externalOnOpenChange
+}: VersionHistoryDialogProps) => {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
   const [versions, setVersions] = useState<ProjectVersion[]>([]);
+
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+  const setIsOpen = externalOnOpenChange || setInternalIsOpen;
 
   const loadVersions = () => {
     setVersions(storage.getProjectVersions(projectId));
