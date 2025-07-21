@@ -247,16 +247,16 @@ const WorkflowyItem = ({
                   onChange={(e) => setEditValue(e.target.value)}
                   onBlur={handleBlur}
                   onKeyDown={handleKeyDown}
-                  className="border-none shadow-none px-0 py-1 h-6 text-sm bg-transparent focus-visible:ring-0 leading-5 outline-none"
-                  style={{ minHeight: '24px', margin: 0 }}
+                  className="border-none shadow-none px-0 py-0 h-6 text-sm bg-transparent focus-visible:ring-0 leading-6 outline-none flex items-center"
+                  style={{ minHeight: '24px', margin: 0, lineHeight: '24px' }}
                   placeholder="Type something..."
                 />
               ) : (
                 <div 
-                  className={`text-sm cursor-text px-0 py-1 leading-5 ${
+                  className={`text-sm cursor-text px-0 py-0 leading-6 flex items-center ${
                     node.completed ? 'line-through text-muted-foreground' : ''
                   }`}
-                  style={{ minHeight: '24px', margin: 0, height: '24px' }}
+                  style={{ minHeight: '24px', margin: 0, height: '24px', lineHeight: '24px' }}
                 >
                   {node.content || (
                     <span className="text-muted-foreground italic">Click to edit</span>
