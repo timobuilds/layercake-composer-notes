@@ -117,6 +117,7 @@ const WorkflowyItem = ({
       <div 
         className={`flex items-start gap-2 py-1 pl-${level * 4} hover:bg-muted/30 rounded group cursor-text`}
         onClick={handleClick}
+        data-node-id={node.id}
       >
         {/* Bullet/Toggle */}
         <div className="flex items-center gap-1 mt-1">
@@ -183,8 +184,21 @@ const WorkflowyItem = ({
               onToggleComplete(node.id);
             }}
             className="h-6 w-6 p-0"
+            title="Toggle complete"
           >
             <CheckCircle2 className="h-3 w-3" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(node.id);
+            }}
+            className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+            title="Delete item"
+          >
+            ×
           </Button>
         </div>
       </div>
@@ -308,6 +322,14 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
       };
       storage.addNode(newNode);
       loadNodes();
+      
+      // Focus the new node for immediate editing
+      setTimeout(() => {
+        const newElement = document.querySelector(`[data-node-id="${newNode.id}"] input`);
+        if (newElement) {
+          (newElement as HTMLInputElement).focus();
+        }
+      }, 50);
     }
   };
 
@@ -350,6 +372,14 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
     };
     storage.addNode(newNode);
     loadNodes();
+    
+    // Focus the new node for immediate editing
+    setTimeout(() => {
+      const newElement = document.querySelector(`[data-node-id="${newNode.id}"] input`);
+      if (newElement) {
+        (newElement as HTMLInputElement).focus();
+      }
+    }, 50);
   };
 
   return (

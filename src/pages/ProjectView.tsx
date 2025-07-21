@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { NodeTree } from '@/components/NodeTree';
 import { WorkflowyView } from '@/components/WorkflowyView';
 import { CreateVersionDialog } from '@/components/CreateVersionDialog';
 import { VersionHistoryDialog } from '@/components/VersionHistoryDialog';
@@ -16,10 +15,6 @@ export const ProjectView = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const [project, setProject] = useState<Project | null>(null);
   const [nodes, setNodes] = useState<Node[]>([]);
-  const [viewMode, setViewMode] = useState<'workflowy' | 'tree'>('workflowy');
-  const [isAddingRoot, setIsAddingRoot] = useState(false);
-  const [newRootContent, setNewRootContent] = useState('');
-  const [newRootTitle, setNewRootTitle] = useState('');
 
   useEffect(() => {
     if (projectId) {
@@ -35,23 +30,6 @@ export const ProjectView = () => {
     }
   };
 
-  const handleAddRootNode = () => {
-    if (newRootContent.trim() && projectId) {
-      const newNode: Node = {
-        id: generateId(),
-        projectId,
-        parentId: null,
-        title: newRootTitle.trim() || undefined,
-        content: newRootContent.trim(),
-        createdAt: new Date().toISOString(),
-      };
-      storage.addNode(newNode);
-      setNewRootContent('');
-      setNewRootTitle('');
-      setIsAddingRoot(false);
-      loadNodes();
-    }
-  };
 
   const handleVersionCreated = () => {
     if (projectId) {
@@ -91,131 +69,33 @@ export const ProjectView = () => {
               </Link>
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <h1 className="text-lg font-medium">{project.name}</h1>
-                  <p className="text-xs text-muted-foreground">
-                    v{project.currentVersion} • {nodes.length} root nodes
-                  </p>
-                </div>
+                 <div>
+                   <h1 className="text-lg font-medium">{project.name}</h1>
+                   <p className="text-xs text-muted-foreground">
+                     v{project.currentVersion} • {nodes.length} nodes
+                   </p>
+                 </div>
               </div>
             </div>
             
-            <div className="flex gap-2">
-              <Button
-                variant={viewMode === 'workflowy' ? 'default' : 'outline'}
-                onClick={() => setViewMode('workflowy')}
-                size="sm"
-                className="text-xs"
-              >
-                Workflowy
-              </Button>
-              <Button
-                variant={viewMode === 'tree' ? 'default' : 'outline'}
-                onClick={() => setViewMode('tree')}
-                size="sm"
-                className="text-xs"
-              >
-                Tree
-              </Button>
-              <CreateVersionDialog 
-                projectId={projectId!} 
-                onVersionCreated={handleVersionCreated}
-              />
-              <VersionHistoryDialog 
-                projectId={projectId!} 
-                onVersionRestored={loadNodes}
-              />
-              {viewMode === 'tree' && (
-                <Button
-                  onClick={() => setIsAddingRoot(true)}
-                  size="sm"
-                  className="text-xs"
-                >
-                  <Plus className="h-3 w-3 mr-1" />
-                  Add Node
-                </Button>
-              )}
-            </div>
+             <div className="flex gap-2">
+               <CreateVersionDialog 
+                 projectId={projectId!} 
+                 onVersionCreated={handleVersionCreated}
+               />
+               <VersionHistoryDialog 
+                 projectId={projectId!} 
+                 onVersionRestored={loadNodes}
+               />
+             </div>
           </div>
         </div>
 
-        {/* Add Root Node Form - Only for Tree View */}
-        {isAddingRoot && viewMode === 'tree' && (
-          <Card className="mb-4">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <Plus className="h-4 w-4" />
-                Create Root Node
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Input
-                value={newRootTitle}
-                onChange={(e) => setNewRootTitle(e.target.value)}
-                className="text-xs"
-                placeholder="Node title (optional)"
-              />
-              <Textarea
-                value={newRootContent}
-                onChange={(e) => setNewRootContent(e.target.value)}
-                className="min-h-[80px] resize-none text-xs"
-                placeholder="Write your root node content..."
-              />
-              <div className="flex gap-2">
-                <Button onClick={handleAddRootNode} disabled={!newRootContent.trim()} size="sm" className="text-xs">
-                  <Plus className="h-3 w-3 mr-1" />
-                  Create
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setIsAddingRoot(false);
-                    setNewRootContent('');
-                    setNewRootTitle('');
-                  }}
-                  size="sm"
-                  className="text-xs"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Content */}
-        {viewMode === 'workflowy' ? (
-          <WorkflowyView
-            projectId={projectId!}
-            onNodesChange={loadNodes}
-          />
-        ) : nodes.length > 0 ? (
-          <div className="space-y-3">
-            <NodeTree
-              nodes={nodes}
-              projectId={projectId!}
-              onNodesChange={loadNodes}
-            />
-          </div>
-        ) : (
-          <div className="text-center py-16">
-            <div className="text-muted-foreground mb-4">
-              <FileText className="h-12 w-12 mx-auto" />
-            </div>
-            <h3 className="text-base font-medium mb-2">No nodes yet</h3>
-            <p className="text-xs text-muted-foreground mb-4">
-              Create your first node to start organizing your thoughts.
-            </p>
-            <Button
-              size="sm"
-              onClick={() => setIsAddingRoot(true)}
-              className="text-xs"
-            >
-              <Plus className="h-3 w-3 mr-1" />
-              Create First Node
-            </Button>
-          </div>
-        )}
+         {/* Content */}
+         <WorkflowyView
+           projectId={projectId!}
+           onNodesChange={loadNodes}
+         />
       </div>
     </div>
   );
