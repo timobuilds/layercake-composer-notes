@@ -308,7 +308,7 @@ const WorkflowyItem = ({
                     e.stopPropagation();
                     onToggleCollapse(node.id);
                   }}
-                  className="p-0 h-4 w-4 hover:bg-muted rounded flex items-center justify-center"
+                  className="p-0 h-4 w-4 hover:bg-muted rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   {isCollapsed ? (
                     <ChevronRight className="h-3 w-3" />
@@ -316,6 +316,12 @@ const WorkflowyItem = ({
                     <ChevronDown className="h-3 w-3" />
                   )}
                 </button>
+              )}
+              
+              {!hasChildren && (
+                <div className="p-0 h-4 w-4 flex items-center justify-center">
+                  {/* Empty space to maintain alignment */}
+                </div>
               )}
               
               <button
