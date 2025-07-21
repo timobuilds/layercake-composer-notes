@@ -2,15 +2,20 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProjectVersion } from '@/types/layercake';
 import { storage } from '@/lib/storage';
 import { formatDistance } from 'date-fns';
-import { History, RotateCcw, Calendar, GitMerge, GitBranch } from 'lucide-react';
+import { History, RotateCcw, Calendar, GitMerge, GitBranch, Save, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface VersionHistoryDialogProps {
   projectId: string;
   onVersionRestored: () => void;
+  onVersionCreated?: () => void;
   isOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
@@ -18,16 +23,37 @@ interface VersionHistoryDialogProps {
 export const VersionHistoryDialog = ({ 
   projectId, 
   onVersionRestored,
+  onVersionCreated,
   isOpen: externalIsOpen,
   onOpenChange: externalOnOpenChange
 }: VersionHistoryDialogProps) => {
   const [internalIsOpen, setInternalIsOpen] = useState(false);
   const [versions, setVersions] = useState<ProjectVersion[]>([]);
   const [selectedVersions, setSelectedVersions] = useState<string[]>([]);
+  const [version, setVersion] = useState('');
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
   const { toast } = useToast();
 
   const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
   const setIsOpen = externalOnOpenChange || setInternalIsOpen;
+
+  const handleCreateVersion = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (version.trim() && name.trim()) {
+      const nodes = storage.getProjectNodes(projectId);
+      storage.createVersion(projectId, version.trim(), name.trim(), nodes, description.trim());
+      loadVersions();
+      onVersionCreated?.();
+      setVersion('');
+      setName('');
+      setDescription('');
+      toast({
+        title: "Version Created",
+        description: `Version ${version.trim()} has been created successfully.`,
+      });
+    }
+  };
 
   const loadVersions = () => {
     setVersions(storage.getProjectVersions(projectId));
@@ -80,13 +106,62 @@ export const VersionHistoryDialog = ({
       setIsOpen(open);
       if (open) loadVersions();
     }}>
-      <DialogContent className="sm:max-w-[700px] max-h-[700px]">
+      <DialogContent className="sm:max-w-[800px] max-h-[700px]">
         <DialogHeader>
-          <DialogTitle className="text-base">Version History</DialogTitle>
+          <DialogTitle className="text-base">Version Manager</DialogTitle>
           <DialogDescription className="text-xs">
-            View, restore, and merge previous versions of your project.
+            Create new versions, view history, and merge previous versions of your project.
           </DialogDescription>
         </DialogHeader>
+        
+        <Tabs defaultValue="history" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="history" className="text-xs">Version History</TabsTrigger>
+            <TabsTrigger value="create" className="text-xs">Create Version</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="create" className="space-y-4">
+            <form onSubmit={handleCreateVersion} className="space-y-3">
+              <div className="space-y-1">
+                <Label htmlFor="version" className="text-xs">Version Number</Label>
+                <Input
+                  id="version"
+                  value={version}
+                  onChange={(e) => setVersion(e.target.value)}
+                  placeholder="e.g. 1.1.0"
+                  className="text-xs"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="name" className="text-xs">Version Name</Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Initial structure"
+                  className="text-xs"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="description" className="text-xs">Description (optional)</Label>
+                <Textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="What changed in this version?"
+                  className="text-xs min-h-[60px]"
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button type="submit" disabled={!version.trim() || !name.trim()} size="sm" className="text-xs">
+                  <Save className="h-3 w-3 mr-1" />
+                  Create Version
+                </Button>
+              </div>
+            </form>
+          </TabsContent>
+          
+          <TabsContent value="history" className="space-y-4">
         
         {selectedVersions.length === 2 && (
           <div className="flex gap-2 p-3 bg-muted/30 rounded-lg border">
@@ -114,7 +189,7 @@ export const VersionHistoryDialog = ({
           </div>
         )}
 
-        <div className="max-h-[500px] overflow-y-auto">
+        <div className="max-h-[400px] overflow-y-auto">
           {versions.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-xs text-muted-foreground">No versions saved yet.</p>
@@ -213,6 +288,8 @@ export const VersionHistoryDialog = ({
             </div>
           )}
         </div>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

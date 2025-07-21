@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { WorkflowyView } from '@/components/WorkflowyView';
-import { CreateVersionDialog } from '@/components/CreateVersionDialog';
 import { VersionHistoryDialog } from '@/components/VersionHistoryDialog';
 import { storage, generateId } from '@/lib/storage';
 import { Project, Node } from '@/types/layercake';
@@ -79,17 +78,14 @@ export const ProjectView = () => {
             </div>
             
              <div className="flex gap-2">
-               <CreateVersionDialog 
-                 projectId={projectId!} 
-                 onVersionCreated={handleVersionCreated}
-               />
                 <VersionHistoryDialog 
                   projectId={projectId!} 
                   onVersionRestored={loadNodes}
+                  onVersionCreated={handleVersionCreated}
                   isOpen={isVersionDialogOpen}
                   onOpenChange={setIsVersionDialogOpen}
                 />
-             </div>
+              </div>
           </div>
         </div>
 
