@@ -15,6 +15,7 @@ export const ProjectView = () => {
   const [project, setProject] = useState<Project | null>(null);
   const [nodes, setNodes] = useState<Node[]>([]);
   const [isVersionDialogOpen, setIsVersionDialogOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     if (projectId) {
@@ -51,6 +52,7 @@ export const ProjectView = () => {
       });
       
       loadNodes();
+      setRefreshKey(prev => prev + 1); // Force WorkflowyView to re-render
     }
   };
 
@@ -114,6 +116,7 @@ export const ProjectView = () => {
          <WorkflowyView
            projectId={projectId!}
            onNodesChange={loadNodes}
+           key={refreshKey} // Force re-render when refreshKey changes
          />
       </div>
     </div>
