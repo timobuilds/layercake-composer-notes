@@ -80,11 +80,6 @@ export const VersionHistoryDialog = ({
       setIsOpen(open);
       if (open) loadVersions();
     }}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="text-xs">
-          <History className="h-3 w-3" />
-        </Button>
-      </DialogTrigger>
       <DialogContent className="sm:max-w-[700px] max-h-[700px]">
         <DialogHeader>
           <DialogTitle className="text-base">Version History</DialogTitle>
