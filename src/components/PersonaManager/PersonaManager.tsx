@@ -366,8 +366,8 @@ export const PersonaManager = ({ isOpen, onClose }: PersonaManagerProps) => {
       <div className="flex flex-1 overflow-hidden min-h-0">
         {!state.isEditing ? (
           <>
-            {/* Left Panel - Persona List */}
-            <div className="w-1/2 flex flex-col min-h-0 p-4 border-r border-border">
+            {/* Persona List - Full Width */}
+            <div className="flex-1 flex flex-col min-h-0 p-4">
               <div className="flex-shrink-0 space-y-3 mb-4">
                 <Input
                   placeholder="Search personas..."
@@ -402,11 +402,6 @@ export const PersonaManager = ({ isOpen, onClose }: PersonaManagerProps) => {
                   onPersonaDuplicate={handleDuplicatePersona}
                 />
               )}
-            </div>
-
-            {/* Right Panel - Preview */}
-            <div className="w-1/2 p-4">
-              <PersonaPreview persona={state.selectedPersona} />
             </div>
           </>
         ) : (
