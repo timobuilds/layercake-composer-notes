@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Node } from '@/types/layercake';
 import { storage, generateId } from '@/lib/storage';
-import { ChevronRight, ChevronDown, Circle, CheckCircle2, Home, Dot, MoreHorizontal, Plus } from 'lucide-react';
+import { ChevronRight, ChevronDown, Circle, CheckCircle2, Home, Dot, MoreHorizontal, Plus, Copy, Lock, Trash2, Calendar, Clock } from 'lucide-react';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -11,6 +11,7 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from '@/components/ui/context-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface WorkflowyViewProps {
   projectId: string;
@@ -133,14 +134,51 @@ const WorkflowyItem = ({
           >
             {/* Three dots menu - only visible on hover */}
             <div className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0 hover:bg-accent"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0 hover:bg-accent"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent 
+                  className="w-48 p-2" 
+                  side="left" 
+                  align="start"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="space-y-1">
+                    <button className="flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent rounded text-left">
+                      <Copy className="h-4 w-4 mr-2" />
+                      Copy tree
+                    </button>
+                    <button className="flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent rounded text-left">
+                      <Lock className="h-4 w-4 mr-2" />
+                      Lock
+                    </button>
+                    <button 
+                      className="flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent rounded text-left text-destructive"
+                      onClick={() => onDelete(node.id)}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete
+                    </button>
+                    <div className="border-t my-1"></div>
+                    <div className="flex items-center px-2 py-1.5 text-xs text-muted-foreground">
+                      <Calendar className="h-3 w-3 mr-2" />
+                      Date created: {new Date(node.createdAt).toLocaleDateString()}
+                    </div>
+                    <div className="flex items-center px-2 py-1.5 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3 mr-2" />
+                      Last edit: {new Date(node.createdAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
 
             {/* Bullet/Toggle */}
