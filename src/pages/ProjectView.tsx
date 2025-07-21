@@ -38,6 +38,22 @@ export const ProjectView = () => {
     }
   };
 
+  const handleCollapseAll = () => {
+    if (projectId) {
+      const allNodes = storage.getNodes();
+      const projectNodes = allNodes.filter(node => node.projectId === projectId);
+      
+      projectNodes.forEach(node => {
+        const hasChildren = storage.getChildNodes(node.id).length > 0;
+        if (hasChildren) {
+          storage.updateNode(node.id, { collapsed: true });
+        }
+      });
+      
+      loadNodes();
+    }
+  };
+
   if (!project) {
     return (
       <div className="min-h-screen bg-background flex justify-center items-center">
@@ -74,7 +90,12 @@ export const ProjectView = () => {
                  v{project.currentVersion}
                </span>
               <span>•</span>
-              <span>{nodes.length} nodes</span>
+              <span 
+                className="cursor-pointer hover:text-foreground transition-colors"
+                onClick={handleCollapseAll}
+              >
+                {nodes.length} nodes
+              </span>
             </div>
             
              <div className="flex gap-2">
