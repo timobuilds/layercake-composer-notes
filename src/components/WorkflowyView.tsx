@@ -599,7 +599,7 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
       )}
 
       {/* Items */}
-      <div className="workflowy-items flex flex-wrap gap-4">
+      <div className="workflowy-items space-y-1">
         {nodes.map((node) => {
           console.log('Rendering node:', node.id, 'locked:', node.locked);
           return (
