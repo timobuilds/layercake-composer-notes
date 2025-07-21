@@ -5,6 +5,8 @@ import { Project } from '@/types/layercake';
 import { formatDistance } from 'date-fns';
 import { Clock, GitFork, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { storage } from '@/lib/storage';
+import { Node, NodeWithChildren } from '@/types/layercake';
 
 interface ProjectCardProps {
   project: Project;
@@ -15,12 +17,43 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
   const timeAgo = formatDistance(createdAt, new Date(), { addSuffix: true });
   const { toast } = useToast();
 
+  const buildNodeTree = (nodes: Node[], parentId: string | null = null): NodeWithChildren[] => {
+    return nodes
+      .filter(node => node.parentId === parentId)
+      .map(node => ({
+        ...node,
+        children: buildNodeTree(nodes, node.id)
+      }));
+  };
+
+  const generateMarkdown = (nodes: NodeWithChildren[], level: number = 0): string => {
+    return nodes.map(node => {
+      const indent = '#'.repeat(Math.max(1, level + 1));
+      let markdown = `${indent} ${node.content}\n\n`;
+      
+      if (node.children && node.children.length > 0) {
+        markdown += generateMarkdown(node.children, level + 1);
+      }
+      
+      return markdown;
+    }).join('');
+  };
+
   const handleCopy = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    navigator.clipboard.writeText(project.name);
+    
+    // Get all nodes for this project
+    const projectNodes = storage.getProjectNodes(project.id);
+    const rootNodes = buildNodeTree(projectNodes);
+    
+    // Generate markdown content
+    let markdownContent = `# ${project.name}\n\n`;
+    markdownContent += generateMarkdown(rootNodes);
+    
+    navigator.clipboard.writeText(markdownContent);
     toast({
-      description: "Project name copied to clipboard",
+      description: "Project exported as markdown",
     });
   };
 
