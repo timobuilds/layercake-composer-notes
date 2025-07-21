@@ -544,25 +544,28 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
 
       {/* Items */}
       <div className="workflowy-items space-y-1">
-        {nodes.map((node) => (
-          <WorkflowyItemContainer
-            key={node.id}
-            node={node}
-            level={0}
-            focusedId={focusedNodeId}
-            onFocus={handleFocus}
-            onEdit={handleEdit}
-            onToggleComplete={handleToggleComplete}
-            onToggleCollapse={handleToggleCollapse}
-            onCreateChild={handleCreateChild}
-            onCreateSibling={handleCreateSibling}
-            onDelete={handleDelete}
-            onIndent={handleIndent}
-            onOutdent={handleOutdent}
-            onCopyTree={handleCopyTree}
-            onToggleLock={handleToggleLock}
-          />
-        ))}
+        {nodes.map((node) => {
+          console.log('Rendering node:', node.id, 'locked:', node.locked);
+          return (
+            <WorkflowyItemContainer
+              key={node.id}
+              node={node}
+              level={0}
+              focusedId={focusedNodeId}
+              onFocus={handleFocus}
+              onEdit={handleEdit}
+              onToggleComplete={handleToggleComplete}
+              onToggleCollapse={handleToggleCollapse}
+              onCreateChild={handleCreateChild}
+              onCreateSibling={handleCreateSibling}
+              onDelete={handleDelete}
+              onIndent={handleIndent}
+              onOutdent={handleOutdent}
+              onCopyTree={handleCopyTree}
+              onToggleLock={handleToggleLock}
+            />
+          );
+        })}
       </div>
 
       {/* Add new item */}
