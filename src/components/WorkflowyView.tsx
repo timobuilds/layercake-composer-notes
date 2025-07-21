@@ -12,6 +12,8 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 
 interface WorkflowyViewProps {
   projectId: string;
@@ -273,6 +275,31 @@ const WorkflowyItem = ({
                               <div className="px-2 py-1 rounded text-xs font-medium text-white" style={{ backgroundColor: 'hsl(var(--persona-purple))' }}>
                                 Actor
                               </div>
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <button className="px-2 py-1 rounded text-xs font-medium border border-dashed border-muted-foreground/50 text-muted-foreground hover:bg-muted/50 transition-colors">
+                                    <Plus className="h-3 w-3" />
+                                  </button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-2xl">
+                                  <DialogHeader>
+                                    <DialogTitle>Prompt Persona Manager</DialogTitle>
+                                  </DialogHeader>
+                                  <div className="space-y-4">
+                                    <div className="space-y-2">
+                                      <label className="text-sm font-medium">Add Instruction Prompt</label>
+                                      <Textarea 
+                                        placeholder="Enter persona instructions..."
+                                        className="min-h-32"
+                                      />
+                                    </div>
+                                    <div className="flex justify-end gap-2">
+                                      <Button variant="outline">Cancel</Button>
+                                      <Button>Save Persona</Button>
+                                    </div>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
                             </div>
                           </div>
                           <div className="border-t border-border my-1" />
