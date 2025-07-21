@@ -22,6 +22,7 @@ interface WorkflowyItemProps {
   node: Node;
   level: number;
   focusedId: string | null;
+  isLocked: boolean;
   onFocus: (nodeId: string) => void;
   onEdit: (nodeId: string, content: string) => void;
   onToggleComplete: (nodeId: string) => void;
@@ -31,13 +32,16 @@ interface WorkflowyItemProps {
   onDelete: (nodeId: string) => void;
   onIndent: (nodeId: string) => void;
   onOutdent: (nodeId: string) => void;
+  onCopyTree: (nodeId: string) => void;
+  onToggleLock: () => void;
   children: Node[];
 }
 
 const WorkflowyItem = ({ 
   node, 
   level, 
-  focusedId, 
+  focusedId,
+  isLocked,
   onFocus, 
   onEdit, 
   onToggleComplete, 
@@ -47,6 +51,8 @@ const WorkflowyItem = ({
   onDelete,
   onIndent,
   onOutdent,
+  onCopyTree,
+  onToggleLock,
   children 
 }: WorkflowyItemProps) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -66,7 +72,7 @@ const WorkflowyItem = ({
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!isEditing) {
+    if (!isEditing && !isLocked) {
       setIsEditing(true);
     }
   };
@@ -88,6 +94,8 @@ const WorkflowyItem = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (isLocked) return;
+    
     switch (e.key) {
       case 'Enter':
         if (e.shiftKey) {
@@ -152,17 +160,24 @@ const WorkflowyItem = ({
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="space-y-1">
-                    <button className="flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent rounded text-left">
+                    <button 
+                      className="flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent rounded text-left"
+                      onClick={() => onCopyTree(node.id)}
+                    >
                       <Copy className="h-4 w-4 mr-2" />
                       Copy tree
                     </button>
-                    <button className="flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent rounded text-left">
-                      <Lock className="h-4 w-4 mr-2" />
-                      Lock
+                    <button 
+                      className="flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent rounded text-left"
+                      onClick={onToggleLock}
+                    >
+                      <Lock className={`h-4 w-4 mr-2 ${isLocked ? 'text-red-500' : ''}`} />
+                      {isLocked ? 'Unlock' : 'Lock'}
                     </button>
                     <button 
-                      className="flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent rounded text-left text-destructive"
-                      onClick={() => onDelete(node.id)}
+                      className={`flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent rounded text-left ${isLocked ? 'opacity-50 cursor-not-allowed' : 'text-destructive'}`}
+                      onClick={() => !isLocked && onDelete(node.id)}
+                      disabled={isLocked}
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
                       Delete
@@ -239,11 +254,17 @@ const WorkflowyItem = ({
         </ContextMenuTrigger>
         
         <ContextMenuContent>
-          <ContextMenuItem onClick={() => onCreateChild(node.id, '')}>
+          <ContextMenuItem 
+            onClick={() => !isLocked && onCreateChild(node.id, '')}
+            disabled={isLocked}
+          >
             <Plus className="h-4 w-4 mr-2" />
             Add child
           </ContextMenuItem>
-          <ContextMenuItem onClick={() => onCreateSibling(node.id, '')}>
+          <ContextMenuItem 
+            onClick={() => !isLocked && onCreateSibling(node.id, '')}
+            disabled={isLocked}
+          >
             <Plus className="h-4 w-4 mr-2" />
             Add sibling
           </ContextMenuItem>
@@ -254,7 +275,8 @@ const WorkflowyItem = ({
           </ContextMenuItem>
           <ContextMenuSeparator />
           <ContextMenuItem 
-            onClick={() => onDelete(node.id)}
+            onClick={() => !isLocked && onDelete(node.id)}
+            disabled={isLocked}
             className="text-destructive focus:text-destructive"
           >
             Delete
@@ -271,6 +293,7 @@ const WorkflowyItem = ({
               node={child}
               level={level + 1}
               focusedId={focusedId}
+              isLocked={isLocked}
               onFocus={onFocus}
               onEdit={onEdit}
               onToggleComplete={onToggleComplete}
@@ -280,6 +303,8 @@ const WorkflowyItem = ({
               onDelete={onDelete}
               onIndent={onIndent}
               onOutdent={onOutdent}
+              onCopyTree={onCopyTree}
+              onToggleLock={onToggleLock}
             />
           ))}
         </div>
@@ -297,6 +322,7 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
   const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
   const [nodes, setNodes] = useState<Node[]>([]);
   const [breadcrumbs, setBreadcrumbs] = useState<Node[]>([]);
+  const [isLocked, setIsLocked] = useState<boolean>(false);
 
   const loadNodes = useCallback(() => {
     if (focusedNodeId) {
@@ -425,7 +451,38 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
     }
   };
 
+  const handleCopyTree = (nodeId: string) => {
+    const buildMarkdown = (node: Node, level: number = 0): string => {
+      const indent = '  '.repeat(level);
+      const prefix = level === 0 ? '# ' : '- ';
+      let markdown = `${indent}${prefix}${node.content || 'Untitled'}\n`;
+      
+      const children = storage.getChildNodes(node.id);
+      children.forEach(child => {
+        markdown += buildMarkdown(child, level + 1);
+      });
+      
+      return markdown;
+    };
+    
+    const allNodes = storage.getNodes();
+    const node = allNodes.find(n => n.id === nodeId);
+    if (node) {
+      const markdown = buildMarkdown(node);
+      navigator.clipboard.writeText(markdown).then(() => {
+        // Could add a toast notification here
+        console.log('Tree copied to clipboard as markdown');
+      });
+    }
+  };
+
+  const handleToggleLock = () => {
+    setIsLocked(!isLocked);
+  };
+
   const handleAddNew = () => {
+    if (isLocked) return;
+    
     const newNode: Node = {
       id: generateId(),
       projectId,
@@ -483,6 +540,7 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
             node={node}
             level={0}
             focusedId={focusedNodeId}
+            isLocked={isLocked}
             onFocus={handleFocus}
             onEdit={handleEdit}
             onToggleComplete={handleToggleComplete}
@@ -492,6 +550,8 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
             onDelete={handleDelete}
             onIndent={handleIndent}
             onOutdent={handleOutdent}
+            onCopyTree={handleCopyTree}
+            onToggleLock={handleToggleLock}
           />
         ))}
       </div>
