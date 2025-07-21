@@ -104,7 +104,25 @@ export const storage = {
     
     if (!nodeToMove || !targetNode) return;
 
-    // Get siblings of the target node
+    // Prevent circular references: check if target is a descendant of the node being moved
+    if (this.isDescendantOf(targetNodeId, nodeId, nodes)) {
+      console.warn('Cannot move node: would create circular reference');
+      return;
+    }
+
+    // Prevent moving to same position
+    if (nodeToMove.parentId === targetNode.parentId) {
+      const siblings = this.getChildNodes(targetNode.parentId || '');
+      const nodeIndex = siblings.findIndex(n => n.id === nodeId);
+      const targetIndex = siblings.findIndex(n => n.id === targetNodeId);
+      
+      if ((position === 'before' && nodeIndex === targetIndex - 1) ||
+          (position === 'after' && nodeIndex === targetIndex + 1)) {
+        return; // Already in the correct position
+      }
+    }
+
+    // Get siblings of the target node (excluding the node being moved)
     const siblings = this.getChildNodes(targetNode.parentId || '').filter(n => n.id !== nodeId);
     
     // Find target position

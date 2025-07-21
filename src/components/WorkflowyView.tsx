@@ -171,6 +171,20 @@ const WorkflowyItem = ({
     
     const draggedNodeId = e.dataTransfer.getData('text/plain');
     if (draggedNodeId && draggedNodeId !== node.id) {
+      // Check if the dragged node is locked
+      const allNodes = storage.getNodes();
+      const draggedNode = allNodes.find(n => n.id === draggedNodeId);
+      if (draggedNode?.locked) {
+        setDragPosition(null);
+        return; // Don't allow moving locked nodes
+      }
+
+      // Check if trying to drop onto a locked node as child
+      if (dragPosition === 'child' && node.locked) {
+        setDragPosition(null);
+        return; // Don't allow dropping into locked nodes
+      }
+
       if (dragPosition === 'before') {
         // Insert as sibling before this node
         storage.insertNodeAt(draggedNodeId, node.id, 'before');
@@ -179,6 +193,11 @@ const WorkflowyItem = ({
         storage.insertNodeAt(draggedNodeId, node.id, 'after');
       } else {
         // Move the dragged node to be a child of this node
+        // Additional circular reference check
+        if (storage.isDescendantOf(node.id, draggedNodeId, allNodes)) {
+          setDragPosition(null);
+          return; // Prevent circular reference
+        }
         storage.updateNode(draggedNodeId, { parentId: node.id });
       }
       
@@ -208,7 +227,7 @@ const WorkflowyItem = ({
             onClick={handleClick}
             data-node-id={node.id}
             style={{ paddingLeft: `${indentLevel + 8}px` }}
-            draggable={!isEditing}
+            draggable={!isEditing && !node.locked}
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -635,7 +654,6 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
       {/* Items */}
       <div className="workflowy-items space-y-1">
         {nodes.map((node) => {
-          console.log('Rendering node:', node.id, 'locked:', node.locked);
           return (
             <WorkflowyItemContainer
               key={node.id}
