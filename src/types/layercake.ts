@@ -23,6 +23,7 @@ export interface Node {
   content: string;
   completed?: boolean; // For marking items as done
   collapsed?: boolean; // For collapsing branches
+  locked?: boolean; // For locking individual nodes
   createdAt: string;
 }
 

@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Node } from '@/types/layercake';
 import { storage, generateId } from '@/lib/storage';
-import { ChevronRight, ChevronDown, Circle, CheckCircle2, Home, Dot, MoreHorizontal, Plus, Copy, Lock, Trash2, Calendar, Clock } from 'lucide-react';
+import { ChevronRight, ChevronDown, Circle, CheckCircle2, Home, Dot, MoreHorizontal, Plus, Copy, Lock, Unlock, Trash2, Calendar, Clock } from 'lucide-react';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -22,7 +22,6 @@ interface WorkflowyItemProps {
   node: Node;
   level: number;
   focusedId: string | null;
-  isLocked: boolean;
   onFocus: (nodeId: string) => void;
   onEdit: (nodeId: string, content: string) => void;
   onToggleComplete: (nodeId: string) => void;
@@ -33,7 +32,7 @@ interface WorkflowyItemProps {
   onIndent: (nodeId: string) => void;
   onOutdent: (nodeId: string) => void;
   onCopyTree: (nodeId: string) => void;
-  onToggleLock: () => void;
+  onToggleLock: (nodeId: string) => void;
   children: Node[];
 }
 
@@ -41,7 +40,6 @@ const WorkflowyItem = ({
   node, 
   level, 
   focusedId,
-  isLocked,
   onFocus, 
   onEdit, 
   onToggleComplete, 
@@ -72,7 +70,7 @@ const WorkflowyItem = ({
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!isEditing && !isLocked) {
+    if (!isEditing && !node.locked) {
       setIsEditing(true);
     }
   };
@@ -94,7 +92,7 @@ const WorkflowyItem = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (isLocked) return;
+    if (node.locked) return;
     
     switch (e.key) {
       case 'Enter':
@@ -169,15 +167,19 @@ const WorkflowyItem = ({
                     </button>
                     <button 
                       className="flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent rounded text-left"
-                      onClick={onToggleLock}
+                      onClick={() => onToggleLock(node.id)}
                     >
-                      <Lock className={`h-4 w-4 mr-2 ${isLocked ? 'text-red-500' : ''}`} />
-                      {isLocked ? 'Unlock' : 'Lock'}
+                      {node.locked ? (
+                        <Unlock className="h-4 w-4 mr-2 text-red-500" />
+                      ) : (
+                        <Lock className="h-4 w-4 mr-2" />
+                      )}
+                      {node.locked ? 'Unlock' : 'Lock'}
                     </button>
                     <button 
-                      className={`flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent rounded text-left ${isLocked ? 'opacity-50 cursor-not-allowed' : 'text-destructive'}`}
-                      onClick={() => !isLocked && onDelete(node.id)}
-                      disabled={isLocked}
+                      className={`flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent rounded text-left ${node.locked ? 'opacity-50 cursor-not-allowed' : 'text-destructive'}`}
+                      onClick={() => !node.locked && onDelete(node.id)}
+                      disabled={node.locked}
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
                       Delete
@@ -195,6 +197,13 @@ const WorkflowyItem = ({
                 </PopoverContent>
               </Popover>
             </div>
+
+            {/* Lock icon for locked nodes */}
+            {node.locked && (
+              <div className="flex-shrink-0">
+                <Lock className="h-3 w-3 text-red-500" />
+              </div>
+            )}
 
             {/* Bullet/Toggle */}
             <div className="flex items-center gap-1 flex-shrink-0">
@@ -255,15 +264,15 @@ const WorkflowyItem = ({
         
         <ContextMenuContent>
           <ContextMenuItem 
-            onClick={() => !isLocked && onCreateChild(node.id, '')}
-            disabled={isLocked}
+            onClick={() => !node.locked && onCreateChild(node.id, '')}
+            disabled={node.locked}
           >
             <Plus className="h-4 w-4 mr-2" />
             Add child
           </ContextMenuItem>
           <ContextMenuItem 
-            onClick={() => !isLocked && onCreateSibling(node.id, '')}
-            disabled={isLocked}
+            onClick={() => !node.locked && onCreateSibling(node.id, '')}
+            disabled={node.locked}
           >
             <Plus className="h-4 w-4 mr-2" />
             Add sibling
@@ -275,8 +284,8 @@ const WorkflowyItem = ({
           </ContextMenuItem>
           <ContextMenuSeparator />
           <ContextMenuItem 
-            onClick={() => !isLocked && onDelete(node.id)}
-            disabled={isLocked}
+            onClick={() => !node.locked && onDelete(node.id)}
+            disabled={node.locked}
             className="text-destructive focus:text-destructive"
           >
             Delete
@@ -293,7 +302,6 @@ const WorkflowyItem = ({
               node={child}
               level={level + 1}
               focusedId={focusedId}
-              isLocked={isLocked}
               onFocus={onFocus}
               onEdit={onEdit}
               onToggleComplete={onToggleComplete}
@@ -322,7 +330,6 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
   const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
   const [nodes, setNodes] = useState<Node[]>([]);
   const [breadcrumbs, setBreadcrumbs] = useState<Node[]>([]);
-  const [isLocked, setIsLocked] = useState<boolean>(false);
 
   const loadNodes = useCallback(() => {
     if (focusedNodeId) {
@@ -476,13 +483,16 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
     }
   };
 
-  const handleToggleLock = () => {
-    setIsLocked(!isLocked);
+  const handleToggleLock = (nodeId: string) => {
+    const allNodes = storage.getNodes();
+    const node = allNodes.find(n => n.id === nodeId);
+    if (node) {
+      storage.updateNode(nodeId, { locked: !node.locked });
+      loadNodes();
+    }
   };
 
   const handleAddNew = () => {
-    if (isLocked) return;
-    
     const newNode: Node = {
       id: generateId(),
       projectId,
@@ -540,7 +550,6 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
             node={node}
             level={0}
             focusedId={focusedNodeId}
-            isLocked={isLocked}
             onFocus={handleFocus}
             onEdit={handleEdit}
             onToggleComplete={handleToggleComplete}
