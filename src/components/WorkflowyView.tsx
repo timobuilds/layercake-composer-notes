@@ -59,7 +59,10 @@ const WorkflowyItem = ({
   
   const hasChildren = children.length > 0;
   const isCollapsed = node.collapsed && hasChildren;
-  const indentLevel = level * 20; // 20px per level for cleaner indentation
+  // Adaptive indentation: smaller increments for deeper levels to prevent excessive indentation
+  const baseIndent = Math.min(level * 16, 200); // Max 200px base indentation
+  const extraIndent = Math.max(0, level - 12) * 8; // Smaller increments after level 12
+  const indentLevel = baseIndent + extraIndent;
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
