@@ -56,6 +56,7 @@ const WorkflowyItem = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(node.content);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [dragPosition, setDragPosition] = useState<'before' | 'after' | 'child' | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   
   const hasChildren = children.length > 0;
@@ -140,12 +141,27 @@ const WorkflowyItem = ({
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    const height = rect.height;
+    
+    // Determine drop position based on mouse position
+    if (y < height * 0.25) {
+      setDragPosition('before');
+    } else if (y > height * 0.75) {
+      setDragPosition('after');
+    } else {
+      setDragPosition('child');
+    }
+    
     setIsDragOver(true);
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
+    setDragPosition(null);
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -155,21 +171,41 @@ const WorkflowyItem = ({
     
     const draggedNodeId = e.dataTransfer.getData('text/plain');
     if (draggedNodeId && draggedNodeId !== node.id) {
-      // Move the dragged node to be a child of this node
-      storage.updateNode(draggedNodeId, { parentId: node.id });
+      if (dragPosition === 'before' || dragPosition === 'after') {
+        // Insert as sibling before/after this node
+        const allNodes = storage.getNodes();
+        const currentNode = allNodes.find(n => n.id === node.id);
+        if (currentNode) {
+          storage.updateNode(draggedNodeId, { parentId: currentNode.parentId });
+          // TODO: We could add ordering logic here if needed
+        }
+      } else {
+        // Move the dragged node to be a child of this node
+        storage.updateNode(draggedNodeId, { parentId: node.id });
+      }
+      
       // Trigger refresh through the parent component
       const event = new CustomEvent('nodesChanged');
       window.dispatchEvent(event);
     }
+    
+    setDragPosition(null);
   };
 
   return (
-    <div className="workflowy-item">
+    <div className="workflowy-item relative">
+      {/* Drop indicator line */}
+      {isDragOver && dragPosition === 'before' && (
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-blue-500 z-10 -mt-0.5" />
+      )}
+      {isDragOver && dragPosition === 'after' && (
+        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 z-10 -mb-0.5" />
+      )}
       <ContextMenu>
         <ContextMenuTrigger>
           <div 
             className={`flex items-center gap-2 py-1 hover:bg-muted/30 rounded group cursor-pointer relative transition-colors ${
-              isDragOver ? 'bg-primary/10 border-l-4 border-primary' : ''
+              isDragOver && dragPosition === 'child' ? 'bg-primary/10 border-l-4 border-primary' : ''
             }`}
             onClick={handleClick}
             data-node-id={node.id}
