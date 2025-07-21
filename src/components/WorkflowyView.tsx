@@ -641,7 +641,7 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
             <Button
               variant="ghost"
               onClick={handleAddNew}
-              className="text-sm text-muted-foreground hover:text-foreground h-6 px-0 py-0 justify-start"
+              className="text-sm text-muted-foreground hover:text-foreground h-6 px-0 py-0 justify-start font-normal"
             >
               Add new item
             </Button>
