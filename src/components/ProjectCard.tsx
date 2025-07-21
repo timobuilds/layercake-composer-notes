@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Project } from '@/types/layercake';
 import { formatDistance } from 'date-fns';
-import { Calendar, Hash } from 'lucide-react';
+import { Clock, GitFork } from 'lucide-react';
 
 interface ProjectCardProps {
   project: Project;
@@ -19,11 +19,11 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-medium">{project.name}</h3>
             <span className="text-xs text-muted-foreground flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
+              <Clock className="h-3 w-3" />
               {timeAgo}
             </span>
             <span className="text-xs text-muted-foreground flex items-center gap-1">
-              <Hash className="h-3 w-3" />
+              <GitFork className="h-3 w-3" />
               v{project.currentVersion}
             </span>
           </div>
