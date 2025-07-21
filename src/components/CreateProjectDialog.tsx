@@ -35,8 +35,7 @@ export const CreateProjectDialog = ({ onProjectCreated }: CreateProjectDialogPro
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button size="lg">
-          <Plus className="h-4 w-4 mr-1" />
-          New Project
+          <Plus className="h-4 w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
