@@ -477,9 +477,9 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
       
       // Focus the new node for immediate editing
       setTimeout(() => {
-        const newElement = document.querySelector(`[data-node-id="${newNode.id}"] input`);
+        const newElement = document.querySelector(`[data-node-id="${newNode.id}"]`) as HTMLElement;
         if (newElement) {
-          (newElement as HTMLInputElement).focus();
+          newElement.click();
         }
       }, 50);
     }
