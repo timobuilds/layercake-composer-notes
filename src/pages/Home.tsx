@@ -9,7 +9,12 @@ export const Home = () => {
   const [projects, setProjects] = useState<Project[]>([]);
 
   useEffect(() => {
-    setProjects(storage.getProjects());
+    const allProjects = storage.getProjects();
+    // Sort by most recently created (newest first)
+    const sortedProjects = allProjects.sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    setProjects(sortedProjects);
   }, []);
 
   const handleProjectCreated = (project: Project) => {

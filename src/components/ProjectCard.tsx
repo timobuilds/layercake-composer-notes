@@ -1,9 +1,8 @@
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Project } from '@/types/layercake';
 import { formatDistance } from 'date-fns';
-import { FileText, Calendar } from 'lucide-react';
+import { Calendar, Hash } from 'lucide-react';
 
 interface ProjectCardProps {
   project: Project;
@@ -14,26 +13,22 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
   const timeAgo = formatDistance(createdAt, new Date(), { addSuffix: true });
 
   return (
-    <Card className="w-full">
-      <CardContent className="p-3">
-        <div className="flex items-center justify-between">
+    <Link to={`/project/${project.id}`} className="block">
+      <Card className="w-full hover:bg-accent/50 transition-colors cursor-pointer">
+        <CardContent className="p-3">
           <div className="flex items-center gap-2">
-            <FileText className="h-4 w-4 text-muted-foreground" />
-            <div>
-              <h3 className="text-sm font-medium">{project.name}</h3>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                {timeAgo} • v{project.currentVersion}
-              </p>
-            </div>
+            <h3 className="text-sm font-medium">{project.name}</h3>
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              {timeAgo}
+            </span>
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <Hash className="h-3 w-3" />
+              v{project.currentVersion}
+            </span>
           </div>
-          <Link to={`/project/${project.id}`}>
-            <Button variant="default" size="sm" className="text-xs">
-              Open
-            </Button>
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </Link>
   );
 };
