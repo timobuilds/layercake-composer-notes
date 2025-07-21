@@ -28,7 +28,6 @@ export const Home = () => {
         <div className="border-b border-border pb-4 mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Cake className="h-5 w-5 text-muted-foreground" />
               <h1 className="text-xl font-medium">Layercake</h1>
             </div>
             <CreateProjectDialog onProjectCreated={handleProjectCreated} />
