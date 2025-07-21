@@ -221,7 +221,7 @@ const WorkflowyItem = ({
       <ContextMenu>
         <ContextMenuTrigger>
           <div 
-            className={`flex items-center gap-2 py-1 hover:bg-muted/30 rounded group cursor-pointer relative transition-colors ${
+            className={`flex items-center gap-2 py-1 hover:bg-muted/30 rounded group cursor-pointer relative transition-colors w-full ${
               isDragOver && dragPosition === 'child' ? 'bg-primary/10 border-l-4 border-primary' : ''
             }`}
             onClick={handleClick}
