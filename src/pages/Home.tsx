@@ -17,8 +17,8 @@ export const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-6">
+    <div className="min-h-screen bg-background flex justify-center">
+      <div className="w-[700px] px-4 py-6">
         {/* Header */}
         <div className="border-b border-border pb-4 mb-6">
           <div className="flex items-center justify-between">
@@ -30,9 +30,9 @@ export const Home = () => {
           </div>
         </div>
 
-        {/* Projects Grid */}
+        {/* Projects List */}
         {projects.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+          <div className="space-y-3">
             {projects.map((project) => (
               <ProjectCard key={project.id} project={project} />
             ))}
