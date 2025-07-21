@@ -37,7 +37,7 @@ export const Home = () => {
 
         {/* Personas Section */}
         <div className="mb-6">
-          <h2 className="text-lg font-medium mb-3">Personas</h2>
+          <h2 className="text-[10px] text-muted-foreground mb-2 uppercase tracking-wide">Personas</h2>
           <div className="flex flex-wrap gap-2">
             {['Screenwriter', 'Editor', 'Director', 'Producer', 'Actor'].map((persona, index) => (
               <button
