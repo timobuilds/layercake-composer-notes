@@ -18,7 +18,12 @@ export const PersonaList = ({
   onPersonaDuplicate,
   mainPagePersonas = []
 }: PersonaListProps) => {
-  if (personas.length === 0) {
+  // Filter personas to only show those that match main page personas
+  const filteredPersonas = personas.filter(persona => 
+    mainPagePersonas.includes(persona.name)
+  );
+  
+  if (filteredPersonas.length === 0) {
     return <div className="flex-1 flex items-center justify-center text-center">
         <div className="space-y-2">
           <p className="text-muted-foreground">No personas found</p>
@@ -26,7 +31,7 @@ export const PersonaList = ({
       </div>;
   }
   return <div className="flex-1 overflow-y-auto space-y-2">
-      {personas.map(persona => (
+      {filteredPersonas.map(persona => (
         <div 
           key={persona.id}
           className="p-3 border rounded-lg hover:bg-muted/50 cursor-pointer group"
