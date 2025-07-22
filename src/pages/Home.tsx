@@ -3,7 +3,7 @@ import { ProjectCard } from '@/components/ProjectCard';
 import { CreateProjectDialog } from '@/components/CreateProjectDialog';
 import { Project } from '@/types/layercake';
 import { storage } from '@/lib/storage';
-import { Cake, X } from 'lucide-react';
+import { Cake, X, Pencil } from 'lucide-react';
 import { PersonaManager } from '@/components/PersonaManager/PersonaManager';
 export const Home = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -87,6 +87,16 @@ export const Home = () => {
                 title="Edit personas"
               >
                 <span>{persona}</span>
+                <button 
+                  className="hover:bg-white/20 rounded-sm p-0.5 transition-all"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowPersonaManager(true);
+                  }}
+                  title="Edit persona"
+                >
+                  <Pencil className="h-3 w-3" />
+                </button>
                 <button 
                   className="hover:bg-white/20 rounded-sm p-0.5 transition-all"
                   onClick={(e) => e.stopPropagation()}
