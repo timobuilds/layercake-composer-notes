@@ -648,10 +648,8 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
 
   const handleDelete = (nodeId: string) => {
     // Find the node's position to determine where to focus after deletion
-    const allNodes = storage.getNodes();
     const currentNodes = focusedNodeId ? storage.getChildNodes(focusedNodeId) : storage.getRootNodes(projectId);
     const nodeIndex = currentNodes.findIndex(n => n.id === nodeId);
-    const nodeToDelete = currentNodes[nodeIndex];
     
     // Store focus target before deletion
     let focusTargetId: string | null = null;
@@ -662,9 +660,9 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
     } else if (nodeIndex === 0 && currentNodes.length > 1) {
       // If deleting first node, focus on next sibling
       focusTargetId = currentNodes[1].id;
-    } else if (nodeToDelete.parentId) {
+    } else if (nodeIndex >= 0 && focusedNodeId) {
       // If no siblings, focus on parent
-      focusTargetId = nodeToDelete.parentId;
+      focusTargetId = focusedNodeId;
     }
     
     storage.deleteNode(nodeId);
