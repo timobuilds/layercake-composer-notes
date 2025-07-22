@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -117,6 +118,8 @@ const WorkflowyItem = ({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (node.locked) return;
     
+    console.log('Key pressed:', e.key, 'Node:', node.id, 'Content:', editValue);
+    
     switch (e.key) {
       case 'Enter':
         if (e.shiftKey) {
@@ -130,8 +133,10 @@ const WorkflowyItem = ({
         e.preventDefault();
         handleSave();
         if (e.shiftKey) {
+          console.log('Outdenting node:', node.id);
           onOutdent(node.id);
         } else {
+          console.log('Indenting node:', node.id);
           onIndent(node.id);
         }
         break;
@@ -140,35 +145,65 @@ const WorkflowyItem = ({
         setIsEditing(false);
         break;
       case 'Delete':
-        // Handle Delete key for moving cursor left, and up when content is empty
+        // Handle Delete key for moving cursor right, and up when content is empty
         if (editValue === '' && node.content === '') {
           e.preventDefault();
+          console.log('Deleting empty node with Delete key:', node.id);
           onDelete(node.id);
         }
         break;
       case 'Backspace':
+        console.log('Backspace pressed. Selection:', inputRef.current?.selectionStart, inputRef.current?.selectionEnd, 'Content:', editValue);
+        
         // Handle Backspace for deleting characters and moving up when empty
         if (editValue === '' && node.content === '') {
           e.preventDefault();
+          console.log('Deleting empty node with Backspace:', node.id);
           onDelete(node.id);
         } else if (inputRef.current && inputRef.current.selectionStart === 0 && inputRef.current.selectionEnd === 0) {
-          // Cursor is at the beginning - move to previous node with content
+          // Cursor is at the beginning - merge with previous node
           e.preventDefault();
-          const currentText = editValue;
-          handleSave();
+          console.log('Merging with previous node. Current text:', editValue);
           
-          // Find previous node and append current text to it
+          const currentText = editValue;
+          
+          // Find previous sibling node
           const allNodes = storage.getNodes();
-          const currentNodes = storage.getChildNodes(node.parentId || '').filter(n => n.projectId === node.projectId);
-          const nodeIndex = currentNodes.findIndex(n => n.id === node.id);
+          const parentId = focusedId || null;
+          const siblings = parentId ? 
+            storage.getChildNodes(parentId).filter(n => n.projectId === node.projectId) :
+            storage.getRootNodes(node.projectId);
+            
+          const nodeIndex = siblings.findIndex(n => n.id === node.id);
+          console.log('Node index:', nodeIndex, 'Siblings:', siblings.length);
           
           if (nodeIndex > 0) {
-            const previousNode = currentNodes[nodeIndex - 1];
+            const previousNode = siblings[nodeIndex - 1];
+            console.log('Previous node found:', previousNode.id, 'Content:', previousNode.content);
+            
             // Update previous node content and delete current node
-            storage.updateNode(previousNode.id, { 
-              content: (previousNode.content + currentText).trim() 
-            });
+            const newContent = (previousNode.content + currentText).trim();
+            storage.updateNode(previousNode.id, { content: newContent });
+            
+            // Delete current node
             onDelete(node.id);
+            
+            // Request edit on previous node with cursor at the end of original content
+            setTimeout(() => {
+              const event = new CustomEvent('requestEdit', { detail: previousNode.id });
+              window.dispatchEvent(event);
+              
+              // Set cursor position after the original content
+              setTimeout(() => {
+                const input = document.querySelector(`[data-node-id="${previousNode.id}"] input`) as HTMLInputElement;
+                if (input) {
+                  const originalLength = previousNode.content.length;
+                  input.setSelectionRange(originalLength, originalLength);
+                }
+              }, 50);
+            }, 100);
+          } else {
+            console.log('No previous sibling found');
           }
         }
         break;
@@ -182,6 +217,7 @@ const WorkflowyItem = ({
   const handleDragStart = (e: React.DragEvent) => {
     e.dataTransfer.setData('text/plain', node.id);
     e.dataTransfer.effectAllowed = 'move';
+    console.log('Drag started for node:', node.id);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -216,40 +252,53 @@ const WorkflowyItem = ({
     setIsDragOver(false);
     
     const draggedNodeId = e.dataTransfer.getData('text/plain');
+    console.log('Drop event:', { draggedNodeId, targetNodeId: node.id, position: dragPosition });
+    
     if (draggedNodeId && draggedNodeId !== node.id) {
       // Check if the dragged node is locked
       const allNodes = storage.getNodes();
       const draggedNode = allNodes.find(n => n.id === draggedNodeId);
       if (draggedNode?.locked) {
+        console.log('Cannot move locked node');
         setDragPosition(null);
-        return; // Don't allow moving locked nodes
+        return;
       }
 
       // Check if trying to drop onto a locked node as child
       if (dragPosition === 'child' && node.locked) {
+        console.log('Cannot drop into locked node');
         setDragPosition(null);
-        return; // Don't allow dropping into locked nodes
+        return;
       }
 
-      if (dragPosition === 'before') {
-        // Insert as sibling before this node
-        storage.insertNodeAt(draggedNodeId, node.id, 'before');
-      } else if (dragPosition === 'after') {
-        // Insert as sibling after this node
-        storage.insertNodeAt(draggedNodeId, node.id, 'after');
-      } else {
-        // Move the dragged node to be a child of this node
-        // Additional circular reference check
-        if (storage.isDescendantOf(node.id, draggedNodeId, allNodes)) {
-          setDragPosition(null);
-          return; // Prevent circular reference
-        }
-        storage.updateNode(draggedNodeId, { parentId: node.id });
+      // Prevent circular references
+      if (storage.isDescendantOf(node.id, draggedNodeId, allNodes)) {
+        console.log('Prevented circular reference');
+        setDragPosition(null);
+        return;
       }
-      
-      // Trigger refresh through the parent component
-      const event = new CustomEvent('nodesChanged');
-      window.dispatchEvent(event);
+
+      try {
+        if (dragPosition === 'before') {
+          console.log('Inserting before');
+          storage.insertNodeAt(draggedNodeId, node.id, 'before');
+        } else if (dragPosition === 'after') {
+          console.log('Inserting after');
+          storage.insertNodeAt(draggedNodeId, node.id, 'after');
+        } else {
+          console.log('Moving as child');
+          storage.updateNode(draggedNodeId, { parentId: node.id });
+        }
+        
+        // Trigger a controlled refresh
+        setTimeout(() => {
+          const event = new CustomEvent('nodesChanged');
+          window.dispatchEvent(event);
+        }, 50);
+        
+      } catch (error) {
+        console.error('Error during drag and drop:', error);
+      }
     }
     
     setDragPosition(null);
@@ -280,7 +329,7 @@ const WorkflowyItem = ({
             onDrop={handleDrop}
           >
             {/* Three dots menu - always takes space but only visible on hover */}
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 w-6">{/* Always reserve space */}
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 w-6">
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -564,8 +613,11 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
   const [breadcrumbs, setBreadcrumbs] = useState<Node[]>([]);
 
   const loadNodes = useCallback(() => {
+    console.log('Loading nodes for projectId:', projectId, 'focusedNodeId:', focusedNodeId);
+    
     if (focusedNodeId) {
       const focusedChildren = storage.getChildNodes(focusedNodeId);
+      console.log('Focused children loaded:', focusedChildren.length);
       setNodes(focusedChildren);
       
       // Build breadcrumbs
@@ -584,6 +636,7 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
       setBreadcrumbs(crumbs);
     } else {
       const rootNodes = storage.getRootNodes(projectId);
+      console.log('Root nodes loaded:', rootNodes.length);
       setNodes(rootNodes);
       setBreadcrumbs([]);
     }
@@ -593,14 +646,10 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
     loadNodes();
   }, [loadNodes]);
 
-  // Separate effect to call onNodesChange to avoid infinite loop
-  useEffect(() => {
-    onNodesChange();
-  }, [nodes.length]); // Only depend on nodes length to avoid infinite loops
-
   useEffect(() => {
     // Listen for custom drag events to refresh the view
     const handleNodesChanged = () => {
+      console.log('Nodes changed event received');
       loadNodes();
     };
     
@@ -633,6 +682,7 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
   };
 
   const handleEdit = (nodeId: string, content: string) => {
+    console.log('Editing node:', nodeId, 'New content:', content);
     storage.updateNode(nodeId, { content });
     loadNodes();
   };
@@ -698,10 +748,13 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
     console.log('Deleting node:', nodeId);
     
     // Find the node's position to determine where to focus after deletion
-    const currentNodes = focusedNodeId ? storage.getChildNodes(focusedNodeId) : storage.getRootNodes(projectId);
+    const parentId = focusedNodeId || null;
+    const currentNodes = parentId ? 
+      storage.getChildNodes(parentId).filter(n => n.projectId === projectId) :
+      storage.getRootNodes(projectId);
     const nodeIndex = currentNodes.findIndex(n => n.id === nodeId);
     
-    console.log('Node index:', nodeIndex, 'Total nodes:', currentNodes.length);
+    console.log('Node index:', nodeIndex, 'Total nodes:', currentNodes.length, 'Parent:', parentId);
     
     // Store focus target before deletion
     let focusTargetId: string | null = null;
@@ -714,9 +767,9 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
       // If deleting first node, focus on next sibling
       focusTargetId = currentNodes[1].id;
       console.log('Will focus on next sibling:', focusTargetId);
-    } else if (nodeIndex >= 0 && focusedNodeId) {
-      // If no siblings, focus on parent
-      focusTargetId = focusedNodeId;
+    } else if (parentId) {
+      // If no siblings and we have a parent, focus on parent
+      focusTargetId = parentId;
       console.log('Will focus on parent:', focusTargetId);
     }
     
@@ -734,26 +787,57 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
   };
 
   const handleIndent = (nodeId: string) => {
-    const allNodes = storage.getNodes();
-    const currentNodes = focusedNodeId ? storage.getChildNodes(focusedNodeId) : storage.getRootNodes(projectId);
+    console.log('Indenting node:', nodeId);
+    
+    // Find current node context
+    const parentId = focusedNodeId || null;
+    const currentNodes = parentId ? 
+      storage.getChildNodes(parentId).filter(n => n.projectId === projectId) :
+      storage.getRootNodes(projectId);
     const nodeIndex = currentNodes.findIndex(n => n.id === nodeId);
+    
+    console.log('Current context - Parent:', parentId, 'Index:', nodeIndex, 'Siblings:', currentNodes.length);
     
     if (nodeIndex > 0) {
       const previousSibling = currentNodes[nodeIndex - 1];
-      storage.updateNode(nodeId, { parentId: previousSibling.id });
-      loadNodes();
+      console.log('Moving node under previous sibling:', previousSibling.id);
+      
+      // Validate that previous sibling exists and is not locked
+      if (!previousSibling.locked) {
+        storage.updateNode(nodeId, { parentId: previousSibling.id });
+        
+        // Reload nodes with a slight delay to ensure storage is updated
+        setTimeout(() => {
+          loadNodes();
+        }, 50);
+      } else {
+        console.log('Cannot indent under locked node');
+      }
+    } else {
+      console.log('Cannot indent - no previous sibling');
     }
   };
 
   const handleOutdent = (nodeId: string) => {
+    console.log('Outdenting node:', nodeId);
+    
     const allNodes = storage.getNodes();
     const node = allNodes.find(n => n.id === nodeId);
+    
     if (node && node.parentId) {
       const parent = allNodes.find(n => n.id === node.parentId);
+      console.log('Current parent:', parent?.id, 'Moving to grandparent:', parent?.parentId);
+      
       if (parent) {
         storage.updateNode(nodeId, { parentId: parent.parentId });
-        loadNodes();
+        
+        // Reload nodes with a slight delay
+        setTimeout(() => {
+          loadNodes();
+        }, 50);
       }
+    } else {
+      console.log('Cannot outdent - already at root level or no parent');
     }
   };
 
@@ -776,7 +860,6 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
     if (node) {
       const markdown = buildMarkdown(node);
       navigator.clipboard.writeText(markdown).then(() => {
-        // Could add a toast notification here
         console.log('Tree copied to clipboard as markdown');
       });
     }
@@ -807,6 +890,11 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
       handleRequestEdit(newNode.id);
     }, 100);
   };
+
+  // Trigger onNodesChange only when nodes length changes, not on every render
+  useEffect(() => {
+    onNodesChange();
+  }, [nodes.length, onNodesChange]);
 
   return (
     <div className="workflowy-container">
