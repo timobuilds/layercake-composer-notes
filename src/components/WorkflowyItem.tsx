@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/context-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { PersonaManager } from '@/components/PersonaManager/PersonaManager';
+import { storage } from '@/lib/storage';
 
 interface WorkflowyItemProps {
   node: Node;
@@ -379,8 +380,6 @@ interface WorkflowyItemWrapperProps extends Omit<WorkflowyItemProps, 'children'>
 }
 
 const WorkflowyItemWrapper = (props: WorkflowyItemWrapperProps) => {
-  // This would normally come from a hook or context, but for now we'll import storage directly
-  const { storage } = require('@/lib/storage');
   const children = storage.getChildNodes(props.node.id);
   return <WorkflowyItem {...props} children={children} />;
 };
