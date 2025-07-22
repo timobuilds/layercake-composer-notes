@@ -670,13 +670,14 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
     storage.deleteNode(nodeId);
     loadNodes();
     
-    // Focus on the target node after deletion, but don't auto-edit
+    // Focus on the target node's input after deletion
     if (focusTargetId) {
       setTimeout(() => {
-        const targetElement = document.querySelector(`[data-node-id="${focusTargetId}"]`) as HTMLElement;
-        if (targetElement) {
-          targetElement.focus();
-          // Don't automatically trigger edit mode
+        const targetInput = document.querySelector(`[data-node-id="${focusTargetId}"] input`) as HTMLInputElement;
+        if (targetInput) {
+          targetInput.focus();
+          // Position cursor at the end of the text
+          targetInput.setSelectionRange(targetInput.value.length, targetInput.value.length);
         }
       }, 50);
     }
