@@ -672,19 +672,20 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
     // Focus on the target node's input after deletion
     if (focusTargetId) {
       setTimeout(() => {
-        // First click on the target element to enter edit mode
-        const targetElement = document.querySelector(`[data-node-id="${focusTargetId}"]`) as HTMLElement;
-        if (targetElement) {
-          targetElement.click();
-          // Then focus on the input and position cursor
+        // Find the target node element and trigger a click to enter edit mode
+        const targetNodeElement = document.querySelector(`[data-node-id="${focusTargetId}"] .cursor-text`);
+        if (targetNodeElement) {
+          // Simulate a click to enter edit mode
+          (targetNodeElement as HTMLElement).click();
+          
+          // Wait a bit for the input to be created, then focus and position cursor
           setTimeout(() => {
             const targetInput = document.querySelector(`[data-node-id="${focusTargetId}"] input`) as HTMLInputElement;
             if (targetInput) {
               targetInput.focus();
-              // Position cursor at the end of the text
               targetInput.setSelectionRange(targetInput.value.length, targetInput.value.length);
             }
-          }, 10);
+          }, 100);
         }
       }, 50);
     }
