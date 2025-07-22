@@ -647,8 +647,39 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
   };
 
   const handleDelete = (nodeId: string) => {
+    // Find the node's position to determine where to focus after deletion
+    const allNodes = storage.getNodes();
+    const currentNodes = focusedNodeId ? storage.getChildNodes(focusedNodeId) : storage.getRootNodes(projectId);
+    const nodeIndex = currentNodes.findIndex(n => n.id === nodeId);
+    const nodeToDelete = currentNodes[nodeIndex];
+    
+    // Store focus target before deletion
+    let focusTargetId: string | null = null;
+    
+    if (nodeIndex > 0) {
+      // Focus on previous sibling
+      focusTargetId = currentNodes[nodeIndex - 1].id;
+    } else if (nodeIndex === 0 && currentNodes.length > 1) {
+      // If deleting first node, focus on next sibling
+      focusTargetId = currentNodes[1].id;
+    } else if (nodeToDelete.parentId) {
+      // If no siblings, focus on parent
+      focusTargetId = nodeToDelete.parentId;
+    }
+    
     storage.deleteNode(nodeId);
     loadNodes();
+    
+    // Focus on the target node after deletion, but don't auto-edit
+    if (focusTargetId) {
+      setTimeout(() => {
+        const targetElement = document.querySelector(`[data-node-id="${focusTargetId}"]`) as HTMLElement;
+        if (targetElement) {
+          targetElement.focus();
+          // Don't automatically trigger edit mode
+        }
+      }, 50);
+    }
   };
 
   const handleIndent = (nodeId: string) => {
