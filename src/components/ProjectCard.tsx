@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Project } from '@/types/layercake';
 import { formatDistance } from 'date-fns';
-import { Clock, GitFork, Copy } from 'lucide-react';
+import { Clock, GitFork, Copy, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { storage } from '@/lib/storage';
 import { Node, NodeWithChildren } from '@/types/layercake';
@@ -57,6 +57,34 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
     });
   };
 
+  const handleDownload = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Get all nodes for this project
+    const projectNodes = storage.getProjectNodes(project.id);
+    const rootNodes = buildNodeTree(projectNodes);
+    
+    // Generate markdown content
+    let markdownContent = `# ${project.name}\n\n`;
+    markdownContent += generateMarkdown(rootNodes);
+    
+    // Create and download file
+    const blob = new Blob([markdownContent], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${project.name}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    toast({
+      description: "Project downloaded as markdown file",
+    });
+  };
+
   return (
     <Link to={`/project/${project.id}`} className="block">
       <Card className="w-full hover:bg-accent/50 transition-colors cursor-pointer">
@@ -73,14 +101,24 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
                 {timeAgo}
               </span>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleCopy}
-              className="h-6 w-6 p-0 hover:bg-accent"
-            >
-              <Copy className="h-3 w-3" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCopy}
+                className="h-6 w-6 p-0 hover:bg-accent"
+              >
+                <Copy className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleDownload}
+                className="h-6 w-6 p-0 hover:bg-accent"
+              >
+                <Download className="h-3 w-3" />
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
