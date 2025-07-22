@@ -8,7 +8,7 @@ import { Cake, X, Pencil } from 'lucide-react';
 import { PersonaManager } from '@/components/PersonaManager/PersonaManager';
 export const Home = () => {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [personas, setPersonas] = useState<string[]>([]);
+  const [personas, setPersonas] = useState<any[]>([]);
   const [showPersonaManager, setShowPersonaManager] = useState(false);
   const [editingPersona, setEditingPersona] = useState<string | null>(null);
   const [draggedPersona, setDraggedPersona] = useState<string | null>(null);
@@ -16,7 +16,7 @@ export const Home = () => {
 
   const loadPersonas = () => {
     const storedPersonas = personaStorage.getPersonas();
-    setPersonas(storedPersonas.map(p => p.name));
+    setPersonas(storedPersonas);
   };
 
   useEffect(() => {
@@ -33,14 +33,10 @@ export const Home = () => {
     setProjects([project, ...projects]);
   };
 
-  const handleDeletePersona = (personaToDelete: string) => {
+  const handleDeletePersona = (personaId: string) => {
     // Delete from storage
-    const storedPersonas = personaStorage.getPersonas();
-    const personaToDeleteObj = storedPersonas.find(p => p.name === personaToDelete);
-    if (personaToDeleteObj) {
-      personaStorage.deletePersona(personaToDeleteObj.id);
-      loadPersonas(); // Refresh the list
-    }
+    personaStorage.deletePersona(personaId);
+    loadPersonas(); // Refresh the list
   };
 
   const handlePersonaManagerClose = () => {
@@ -68,24 +64,22 @@ export const Home = () => {
         <div className="mb-6">
           <h2 className="text-[10px] text-muted-foreground mb-2 uppercase tracking-wide">Personas</h2>
           <div className="flex flex-wrap gap-2">
-            {personas.map((persona, index) => (
+            {personas.map((persona) => (
               <button
-                key={persona}
+                key={persona.id}
                 draggable
                 className={`group/persona px-2 py-1 rounded text-xs font-normal text-white flex items-center gap-1 hover:bg-opacity-90 transition-all cursor-pointer border border-white/10 bg-opacity-70 ${
-                  draggedPersona === persona ? 'opacity-50' : ''
+                  draggedPersona === persona.name ? 'opacity-50' : ''
                 } ${
-                  dragOverPersona === persona ? 'scale-105 shadow-lg' : ''
+                  dragOverPersona === persona.name ? 'scale-105 shadow-lg' : ''
                 }`}
                 style={{ 
-                  backgroundColor: `hsl(var(--persona-${
-                    ['blue', 'green', 'yellow', 'brown', 'purple'][index]
-                  }))` 
+                  backgroundColor: persona.color
                 }}
                 onDragStart={(e) => {
                   e.stopPropagation();
-                  setDraggedPersona(persona);
-                  e.dataTransfer.setData('text/plain', persona);
+                  setDraggedPersona(persona.name);
+                  e.dataTransfer.setData('text/plain', persona.name);
                 }}
                 onDragEnd={() => {
                   setDraggedPersona(null);
@@ -94,8 +88,8 @@ export const Home = () => {
                 onDragOver={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  if (draggedPersona && draggedPersona !== persona) {
-                    setDragOverPersona(persona);
+                  if (draggedPersona && draggedPersona !== persona.name) {
+                    setDragOverPersona(persona.name);
                   }
                 }}
                 onDragLeave={(e) => {
@@ -106,24 +100,24 @@ export const Home = () => {
                   e.preventDefault();
                   e.stopPropagation();
                   const draggedItem = e.dataTransfer.getData('text/plain');
-                  if (draggedItem && draggedItem !== persona) {
-                    console.log(`Moving ${draggedItem} to position of ${persona}`);
+                  if (draggedItem && draggedItem !== persona.name) {
+                    console.log(`Moving ${draggedItem} to position of ${persona.name}`);
                   }
                   setDraggedPersona(null);
                   setDragOverPersona(null);
                 }}
                 onClick={() => {
-                  setEditingPersona(persona);
+                  setEditingPersona(persona.name);
                   setShowPersonaManager(true);
                 }}
                 title="Edit persona"
               >
-                <span>{persona}</span>
+                <span>{persona.name}</span>
                 <button 
                   className="hover:bg-white/20 rounded-sm p-0.5 transition-all"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setEditingPersona(persona);
+                    setEditingPersona(persona.name);
                     setShowPersonaManager(true);
                   }}
                   title="Edit persona"
@@ -134,7 +128,7 @@ export const Home = () => {
                   className="hover:bg-white/20 rounded-sm p-0.5 transition-all"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleDeletePersona(persona);
+                    handleDeletePersona(persona.id);
                   }}
                   title="Remove persona"
                 >
@@ -171,7 +165,7 @@ export const Home = () => {
         isOpen={showPersonaManager} 
         onClose={handlePersonaManagerClose}
         onPersonasUpdated={loadPersonas}
-        mainPagePersonas={personas}
+        mainPagePersonas={personas.map(p => p.name)}
         editingPersona={editingPersona}
       />
     </div>;
