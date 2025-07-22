@@ -375,10 +375,12 @@ export const PersonaManager = ({
                 
                 
                 <div className="flex gap-2">
-                  <Button size="sm" onClick={() => handleStartEdit()}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    New Persona
-                  </Button>
+                <button 
+                  className="px-2 py-1 rounded text-xs font-normal border border-dashed border-muted-foreground/30 text-muted-foreground/70 hover:bg-muted/30 transition-colors"
+                  onClick={() => handleStartEdit()}
+                >
+                  + New Persona
+                </button>
                   
                 </div>
               </div>
