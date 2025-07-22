@@ -128,6 +128,7 @@ const WorkflowyItem = ({
         break;
       case 'Tab':
         e.preventDefault();
+        handleSave();
         if (e.shiftKey) {
           onOutdent(node.id);
         } else {
@@ -138,10 +139,37 @@ const WorkflowyItem = ({
         setEditValue(node.content);
         setIsEditing(false);
         break;
-      case 'Backspace':
+      case 'Delete':
+        // Handle Delete key for moving cursor left, and up when content is empty
         if (editValue === '' && node.content === '') {
           e.preventDefault();
           onDelete(node.id);
+        }
+        break;
+      case 'Backspace':
+        // Handle Backspace for deleting characters and moving up when empty
+        if (editValue === '' && node.content === '') {
+          e.preventDefault();
+          onDelete(node.id);
+        } else if (inputRef.current && inputRef.current.selectionStart === 0 && inputRef.current.selectionEnd === 0) {
+          // Cursor is at the beginning - move to previous node with content
+          e.preventDefault();
+          const currentText = editValue;
+          handleSave();
+          
+          // Find previous node and append current text to it
+          const allNodes = storage.getNodes();
+          const currentNodes = storage.getChildNodes(node.parentId || '').filter(n => n.projectId === node.projectId);
+          const nodeIndex = currentNodes.findIndex(n => n.id === node.id);
+          
+          if (nodeIndex > 0) {
+            const previousNode = currentNodes[nodeIndex - 1];
+            // Update previous node content and delete current node
+            storage.updateNode(previousNode.id, { 
+              content: (previousNode.content + currentText).trim() 
+            });
+            onDelete(node.id);
+          }
         }
         break;
     }
