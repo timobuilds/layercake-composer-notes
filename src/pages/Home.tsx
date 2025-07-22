@@ -7,6 +7,7 @@ import { Cake, X, Pencil } from 'lucide-react';
 import { PersonaManager } from '@/components/PersonaManager/PersonaManager';
 export const Home = () => {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [personas, setPersonas] = useState(['Screenwriter', 'Editor', 'Director', 'Producer', 'Actor']);
   const [showPersonaManager, setShowPersonaManager] = useState(false);
   const [draggedPersona, setDraggedPersona] = useState<string | null>(null);
   const [dragOverPersona, setDragOverPersona] = useState<string | null>(null);
@@ -18,6 +19,10 @@ export const Home = () => {
   }, []);
   const handleProjectCreated = (project: Project) => {
     setProjects([project, ...projects]);
+  };
+
+  const handleDeletePersona = (personaToDelete: string) => {
+    setPersonas(personas.filter(persona => persona !== personaToDelete));
   };
   return <div className="min-h-screen bg-background flex justify-center">
       <div className="w-[600px] px-4 py-6">
@@ -39,7 +44,7 @@ export const Home = () => {
         <div className="mb-6">
           <h2 className="text-[10px] text-muted-foreground mb-2 uppercase tracking-wide">Personas</h2>
           <div className="flex flex-wrap gap-2">
-            {['Screenwriter', 'Editor', 'Director', 'Producer', 'Actor'].map((persona, index) => (
+            {personas.map((persona, index) => (
               <button
                 key={persona}
                 draggable
@@ -99,7 +104,10 @@ export const Home = () => {
                 </button>
                 <button 
                   className="hover:bg-white/20 rounded-sm p-0.5 transition-all"
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeletePersona(persona);
+                  }}
                   title="Remove persona"
                 >
                   <X className="h-3 w-3" />
