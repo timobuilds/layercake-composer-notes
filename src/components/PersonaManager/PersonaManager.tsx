@@ -336,7 +336,7 @@ export const PersonaManager = ({
       <div className="fixed inset-0 bg-black/20 z-40" onClick={onClose} />
       
       {/* Side Panel */}
-      <div className="fixed inset-y-0 right-0 w-[900px] bg-background border-l border-border shadow-xl z-50 flex flex-col animate-slide-in-right">
+      <div className="fixed inset-y-0 right-0 w-1/3 bg-background border-l border-border shadow-xl z-50 flex flex-col animate-slide-in-right">
       {/* Header */}
       <div className="flex-shrink-0 border-b border-border p-4">
         <div className="flex items-center justify-between mb-4">
