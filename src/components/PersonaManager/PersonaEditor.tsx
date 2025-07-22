@@ -109,7 +109,20 @@ export const PersonaEditor = ({
 
       {/* Color */}
       <div className="space-y-2">
-        <Label>Color</Label>
+        <div className="flex items-center justify-between">
+          <Label>Color</Label>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const randomColor = availableColors[Math.floor(Math.random() * availableColors.length)];
+              handleColorSelect(randomColor.value);
+            }}
+          >
+            Random
+          </Button>
+        </div>
         <div className="flex gap-2">
           {availableColors.slice(0, 6).map((colorOption) => (
             <button
