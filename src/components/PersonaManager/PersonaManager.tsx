@@ -13,6 +13,7 @@ interface PersonaManagerProps {
   isOpen: boolean;
   onClose: () => void;
   mainPagePersonas?: string[];
+  editingPersona?: string | null;
 }
 const initialFormData: PersonaFormData = {
   name: '',
@@ -24,7 +25,8 @@ const initialFormData: PersonaFormData = {
 export const PersonaManager = ({
   isOpen,
   onClose,
-  mainPagePersonas = []
+  mainPagePersonas = [],
+  editingPersona = null
 }: PersonaManagerProps) => {
   const {
     toast
@@ -54,6 +56,16 @@ export const PersonaManager = ({
       setUndoStack([personas]);
     }
   }, [isOpen]);
+
+  // Auto-start editing when editingPersona is provided
+  useEffect(() => {
+    if (isOpen && editingPersona && state.personas.length > 0) {
+      const persona = state.personas.find(p => p.name === editingPersona);
+      if (persona) {
+        handleStartEdit(persona);
+      }
+    }
+  }, [isOpen, editingPersona, state.personas]);
 
   // Auto-save draft
   useEffect(() => {

@@ -9,6 +9,7 @@ export const Home = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [personas, setPersonas] = useState(['Screenwriter', 'Editor', 'Director', 'Producer', 'Actor']);
   const [showPersonaManager, setShowPersonaManager] = useState(false);
+  const [editingPersona, setEditingPersona] = useState<string | null>(null);
   const [draggedPersona, setDraggedPersona] = useState<string | null>(null);
   const [dragOverPersona, setDragOverPersona] = useState<string | null>(null);
   useEffect(() => {
@@ -88,14 +89,18 @@ export const Home = () => {
                   setDraggedPersona(null);
                   setDragOverPersona(null);
                 }}
-                onClick={() => setShowPersonaManager(true)}
-                title="Edit personas"
+                onClick={() => {
+                  setEditingPersona(persona);
+                  setShowPersonaManager(true);
+                }}
+                title="Edit persona"
               >
                 <span>{persona}</span>
                 <button 
                   className="hover:bg-white/20 rounded-sm p-0.5 transition-all"
                   onClick={(e) => {
                     e.stopPropagation();
+                    setEditingPersona(persona);
                     setShowPersonaManager(true);
                   }}
                   title="Edit persona"
@@ -141,8 +146,12 @@ export const Home = () => {
       {/* Persona Manager */}
       <PersonaManager 
         isOpen={showPersonaManager} 
-        onClose={() => setShowPersonaManager(false)} 
+        onClose={() => {
+          setShowPersonaManager(false);
+          setEditingPersona(null);
+        }} 
         mainPagePersonas={personas}
+        editingPersona={editingPersona}
       />
     </div>;
 };
