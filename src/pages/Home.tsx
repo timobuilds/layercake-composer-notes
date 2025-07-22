@@ -3,27 +3,50 @@ import { ProjectCard } from '@/components/ProjectCard';
 import { CreateProjectDialog } from '@/components/CreateProjectDialog';
 import { Project } from '@/types/layercake';
 import { storage } from '@/lib/storage';
+import { personaStorage } from '@/lib/personaStorage';
 import { Cake, X, Pencil } from 'lucide-react';
 import { PersonaManager } from '@/components/PersonaManager/PersonaManager';
 export const Home = () => {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [personas, setPersonas] = useState(['Screenwriter', 'Editor', 'Director', 'Producer', 'Actor']);
+  const [personas, setPersonas] = useState<string[]>([]);
   const [showPersonaManager, setShowPersonaManager] = useState(false);
   const [editingPersona, setEditingPersona] = useState<string | null>(null);
   const [draggedPersona, setDraggedPersona] = useState<string | null>(null);
   const [dragOverPersona, setDragOverPersona] = useState<string | null>(null);
+
+  const loadPersonas = () => {
+    const storedPersonas = personaStorage.getPersonas();
+    setPersonas(storedPersonas.map(p => p.name));
+  };
+
   useEffect(() => {
     const allProjects = storage.getProjects();
     // Sort by most recently created (newest first)
     const sortedProjects = allProjects.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     setProjects(sortedProjects);
+    
+    // Load personas from storage
+    loadPersonas();
   }, []);
+
   const handleProjectCreated = (project: Project) => {
     setProjects([project, ...projects]);
   };
 
   const handleDeletePersona = (personaToDelete: string) => {
-    setPersonas(personas.filter(persona => persona !== personaToDelete));
+    // Delete from storage
+    const storedPersonas = personaStorage.getPersonas();
+    const personaToDeleteObj = storedPersonas.find(p => p.name === personaToDelete);
+    if (personaToDeleteObj) {
+      personaStorage.deletePersona(personaToDeleteObj.id);
+      loadPersonas(); // Refresh the list
+    }
+  };
+
+  const handlePersonaManagerClose = () => {
+    setShowPersonaManager(false);
+    setEditingPersona(null);
+    loadPersonas(); // Refresh personas when manager closes
   };
   return <div className="min-h-screen bg-background flex justify-center">
       <div className="w-[600px] px-4 py-6">
@@ -146,10 +169,7 @@ export const Home = () => {
       {/* Persona Manager */}
       <PersonaManager 
         isOpen={showPersonaManager} 
-        onClose={() => {
-          setShowPersonaManager(false);
-          setEditingPersona(null);
-        }} 
+        onClose={handlePersonaManagerClose}
         mainPagePersonas={personas}
         editingPersona={editingPersona}
       />
