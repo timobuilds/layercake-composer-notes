@@ -356,7 +356,7 @@ export const PersonaManager = ({
       <div className="flex flex-1 overflow-hidden min-h-0">
         {!state.isEditing ? <>
             {/* Left Panel - Persona List */}
-            <div className="w-1/2 flex flex-col min-h-0 p-4 border-r border-border">
+            <div className="flex-1 flex flex-col min-h-0 p-4">
               <div className="flex-shrink-0 space-y-3 mb-4">
                 
                 
