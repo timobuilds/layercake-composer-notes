@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 interface PersonaManagerProps {
   isOpen: boolean;
   onClose: () => void;
+  onPersonasUpdated?: () => void;
   mainPagePersonas?: string[];
   editingPersona?: string | null;
 }
@@ -25,6 +26,7 @@ const initialFormData: PersonaFormData = {
 export const PersonaManager = ({
   isOpen,
   onClose,
+  onPersonasUpdated,
   mainPagePersonas = [],
   editingPersona = null
 }: PersonaManagerProps) => {
@@ -205,6 +207,7 @@ export const PersonaManager = ({
         title: "Success",
         description: `Persona ${state.selectedPersona ? 'updated' : 'created'} successfully.`
       });
+      onPersonasUpdated?.();
     } catch (error) {
       toast({
         title: "Error",
@@ -227,6 +230,7 @@ export const PersonaManager = ({
         title: "Success",
         description: "Persona deleted successfully."
       });
+      onPersonasUpdated?.();
     }
   };
   const handleDuplicatePersona = (id: string) => {
@@ -241,6 +245,7 @@ export const PersonaManager = ({
         title: "Success",
         description: "Persona duplicated successfully."
       });
+      onPersonasUpdated?.();
     }
   };
   const handleBulkDelete = () => {

@@ -170,6 +170,7 @@ export const Home = () => {
       <PersonaManager 
         isOpen={showPersonaManager} 
         onClose={handlePersonaManagerClose}
+        onPersonasUpdated={loadPersonas}
         mainPagePersonas={personas}
         editingPersona={editingPersona}
       />
