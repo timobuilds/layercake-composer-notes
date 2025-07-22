@@ -24,6 +24,54 @@ export const PersonaList = ({
       </div>;
   }
   return <div className="flex-1 overflow-y-auto space-y-2">
-      {personas.map(persona => {})}
+      {personas.map(persona => (
+        <div 
+          key={persona.id}
+          className="p-3 border rounded-lg hover:bg-muted/50 cursor-pointer group"
+          onClick={() => onPersonaSelect(persona)}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div 
+                className="w-3 h-3 rounded-full" 
+                style={{ backgroundColor: persona.color }}
+              />
+              <span className="font-medium">{persona.name}</span>
+            </div>
+            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPersonaEdit(persona);
+                }}
+              >
+                <Edit3 className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPersonaDuplicate(persona.id);
+                }}
+              >
+                <Copy className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPersonaDelete(persona.id);
+                }}
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      ))}
     </div>;
 };
