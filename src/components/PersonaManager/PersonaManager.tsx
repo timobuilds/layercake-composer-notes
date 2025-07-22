@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 interface PersonaManagerProps {
   isOpen: boolean;
   onClose: () => void;
+  mainPagePersonas?: string[];
 }
 const initialFormData: PersonaFormData = {
   name: '',
@@ -22,7 +23,8 @@ const initialFormData: PersonaFormData = {
 };
 export const PersonaManager = ({
   isOpen,
-  onClose
+  onClose,
+  mainPagePersonas = []
 }: PersonaManagerProps) => {
   const {
     toast
@@ -336,13 +338,13 @@ export const PersonaManager = ({
       <div className="fixed inset-0 bg-black/20 z-40" onClick={onClose} />
       
       {/* Side Panel */}
-      <div className="fixed inset-y-0 right-0 w-[900px] bg-background border-l border-border shadow-xl z-50 flex flex-col animate-slide-in-right">
+      <div className="fixed inset-y-0 right-0 w-1/3 bg-background border-l border-border shadow-xl z-50 flex flex-col animate-slide-in-right">
       {/* Header */}
       <div className="flex-shrink-0 border-b border-border p-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-medium">Prompt Persona Manager</h2>
           <Button variant="ghost" size="sm" onClick={onClose}>
-            
+            <X className="h-4 w-4" />
           </Button>
         </div>
         
@@ -356,7 +358,7 @@ export const PersonaManager = ({
       <div className="flex flex-1 overflow-hidden min-h-0">
         {!state.isEditing ? <>
             {/* Left Panel - Persona List */}
-            <div className="w-1/2 flex flex-col min-h-0 p-4 border-r border-border">
+            <div className="flex-1 flex flex-col min-h-0 p-4">
               <div className="flex-shrink-0 space-y-3 mb-4">
                 
                 
@@ -372,7 +374,7 @@ export const PersonaManager = ({
               {state.showTemplates ? <PersonaTemplates onSelectTemplate={handleStartEdit} /> : <PersonaList personas={filteredPersonas} onPersonaSelect={persona => setState(prev => ({
               ...prev,
               selectedPersona: persona
-            }))} onPersonaEdit={handleStartEdit} onPersonaDelete={handleDeletePersona} onPersonaDuplicate={handleDuplicatePersona} />}
+            }))} onPersonaEdit={handleStartEdit} onPersonaDelete={handleDeletePersona} onPersonaDuplicate={handleDuplicatePersona} mainPagePersonas={mainPagePersonas} />}
             </div>
 
             {/* Right Panel - Preview */}
