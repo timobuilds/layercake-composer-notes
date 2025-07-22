@@ -142,6 +142,7 @@ export const Home = () => {
       <PersonaManager 
         isOpen={showPersonaManager} 
         onClose={() => setShowPersonaManager(false)} 
+        mainPagePersonas={personas}
       />
     </div>;
 };

@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 interface PersonaManagerProps {
   isOpen: boolean;
   onClose: () => void;
+  mainPagePersonas?: string[];
 }
 const initialFormData: PersonaFormData = {
   name: '',
@@ -22,7 +23,8 @@ const initialFormData: PersonaFormData = {
 };
 export const PersonaManager = ({
   isOpen,
-  onClose
+  onClose,
+  mainPagePersonas = []
 }: PersonaManagerProps) => {
   const {
     toast
@@ -372,7 +374,7 @@ export const PersonaManager = ({
               {state.showTemplates ? <PersonaTemplates onSelectTemplate={handleStartEdit} /> : <PersonaList personas={filteredPersonas} onPersonaSelect={persona => setState(prev => ({
               ...prev,
               selectedPersona: persona
-            }))} onPersonaEdit={handleStartEdit} onPersonaDelete={handleDeletePersona} onPersonaDuplicate={handleDuplicatePersona} />}
+            }))} onPersonaEdit={handleStartEdit} onPersonaDelete={handleDeletePersona} onPersonaDuplicate={handleDuplicatePersona} mainPagePersonas={mainPagePersonas} />}
             </div>
 
             {/* Right Panel - Preview */}
