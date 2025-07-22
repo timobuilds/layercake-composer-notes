@@ -34,6 +34,7 @@ interface WorkflowyItemProps {
   onOutdent: (nodeId: string) => void;
   onCopyTree: (nodeId: string) => void;
   onToggleLock: (nodeId: string) => void;
+  onRequestEdit: (nodeId: string) => void;
   children: Node[];
 }
 
@@ -52,6 +53,7 @@ const WorkflowyItem = ({
   onOutdent,
   onCopyTree,
   onToggleLock,
+  onRequestEdit,
   children
 }: WorkflowyItemProps) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -70,10 +72,22 @@ const WorkflowyItem = ({
   const extraIndent = Math.max(0, level - 12) * 8; // Smaller increments after level 12
   const indentLevel = baseIndent + extraIndent;
 
+  // Handle external edit requests
+  useEffect(() => {
+    const handleEditRequest = (e: CustomEvent) => {
+      if (e.detail === node.id) {
+        setIsEditing(true);
+      }
+    };
+
+    window.addEventListener('requestEdit', handleEditRequest as EventListener);
+    return () => window.removeEventListener('requestEdit', handleEditRequest as EventListener);
+  }, [node.id]);
+
   useEffect(() => {
     if (isEditing && inputRef.current) {
       inputRef.current.focus();
-      inputRef.current.select();
+      inputRef.current.setSelectionRange(inputRef.current.value.length, inputRef.current.value.length);
     }
   }, [isEditing]);
 
@@ -127,7 +141,6 @@ const WorkflowyItem = ({
       case 'Backspace':
         if (editValue === '' && node.content === '') {
           e.preventDefault();
-          // Don't call handleSave() here since we're deleting the node
           onDelete(node.id);
         }
         break;
@@ -503,6 +516,7 @@ const WorkflowyItem = ({
               onOutdent={onOutdent}
               onCopyTree={onCopyTree}
               onToggleLock={onToggleLock}
+              onRequestEdit={onRequestEdit}
             />
           ))}
         </div>
@@ -547,14 +561,16 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
     }
   }, [projectId, focusedNodeId]);
 
+  useEffect(() => {
+    loadNodes();
+  }, [loadNodes]);
+
   // Separate effect to call onNodesChange to avoid infinite loop
   useEffect(() => {
     onNodesChange();
-  }, [nodes, onNodesChange]);
+  }, [nodes.length]); // Only depend on nodes length to avoid infinite loops
 
   useEffect(() => {
-    loadNodes();
-    
     // Listen for custom drag events to refresh the view
     const handleNodesChanged = () => {
       loadNodes();
@@ -639,18 +655,25 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
       
       // Focus the new node for immediate editing
       setTimeout(() => {
-        const newElement = document.querySelector(`[data-node-id="${newNode.id}"]`) as HTMLElement;
-        if (newElement) {
-          newElement.click();
-        }
-      }, 50);
+        const event = new CustomEvent('requestEdit', { detail: newNode.id });
+        window.dispatchEvent(event);
+      }, 100);
     }
   };
 
+  const handleRequestEdit = (nodeId: string) => {
+    const event = new CustomEvent('requestEdit', { detail: nodeId });
+    window.dispatchEvent(event);
+  };
+
   const handleDelete = (nodeId: string) => {
+    console.log('Deleting node:', nodeId);
+    
     // Find the node's position to determine where to focus after deletion
     const currentNodes = focusedNodeId ? storage.getChildNodes(focusedNodeId) : storage.getRootNodes(projectId);
     const nodeIndex = currentNodes.findIndex(n => n.id === nodeId);
+    
+    console.log('Node index:', nodeIndex, 'Total nodes:', currentNodes.length);
     
     // Store focus target before deletion
     let focusTargetId: string | null = null;
@@ -658,36 +681,27 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
     if (nodeIndex > 0) {
       // Focus on previous sibling
       focusTargetId = currentNodes[nodeIndex - 1].id;
+      console.log('Will focus on previous sibling:', focusTargetId);
     } else if (nodeIndex === 0 && currentNodes.length > 1) {
       // If deleting first node, focus on next sibling
       focusTargetId = currentNodes[1].id;
+      console.log('Will focus on next sibling:', focusTargetId);
     } else if (nodeIndex >= 0 && focusedNodeId) {
       // If no siblings, focus on parent
       focusTargetId = focusedNodeId;
+      console.log('Will focus on parent:', focusTargetId);
     }
     
+    // Delete the node
     storage.deleteNode(nodeId);
     loadNodes();
     
-    // Focus on the target node's input after deletion
+    // Request edit mode on the target node
     if (focusTargetId) {
+      console.log('Requesting edit for:', focusTargetId);
       setTimeout(() => {
-        // Find the target node element and trigger a click to enter edit mode
-        const targetNodeElement = document.querySelector(`[data-node-id="${focusTargetId}"] .cursor-text`);
-        if (targetNodeElement) {
-          // Simulate a click to enter edit mode
-          (targetNodeElement as HTMLElement).click();
-          
-          // Wait a bit for the input to be created, then focus and position cursor
-          setTimeout(() => {
-            const targetInput = document.querySelector(`[data-node-id="${focusTargetId}"] input`) as HTMLInputElement;
-            if (targetInput) {
-              targetInput.focus();
-              targetInput.setSelectionRange(targetInput.value.length, targetInput.value.length);
-            }
-          }, 100);
-        }
-      }, 50);
+        handleRequestEdit(focusTargetId);
+      }, 150);
     }
   };
 
@@ -762,11 +776,8 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
     
     // Focus the new node for immediate editing
     setTimeout(() => {
-      const newElement = document.querySelector(`[data-node-id="${newNode.id}"] input`);
-      if (newElement) {
-        (newElement as HTMLInputElement).focus();
-      }
-    }, 50);
+      handleRequestEdit(newNode.id);
+    }, 100);
   };
 
   return (
@@ -819,6 +830,7 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
               onOutdent={handleOutdent}
               onCopyTree={handleCopyTree}
               onToggleLock={handleToggleLock}
+              onRequestEdit={handleRequestEdit}
             />
           );
         })}
