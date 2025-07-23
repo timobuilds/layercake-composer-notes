@@ -2,8 +2,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { Node } from '@/types/layercake';
-import { ChevronRight, ChevronDown, Circle, CheckCircle2, MoreHorizontal, Plus, Copy, Lock, Unlock, Trash2, Calendar, Clock, X, Mic, Volume2 } from 'lucide-react';
+import { ChevronRight, ChevronDown, Circle, CheckCircle2, MoreHorizontal, Plus, Copy, Lock, Unlock, Trash2, Calendar, Clock, X, Mic, Volume2, User } from 'lucide-react';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -18,6 +19,7 @@ import { VoiceNotePlayer } from '@/components/VoiceNotePlayer';
 import { InlineVoiceRecorder } from '@/components/InlineVoiceRecorder';
 import { storage } from '@/lib/storage';
 import { VoiceNote } from '@/types/layercake';
+import { personaStorage } from '@/lib/personaStorage';
 
 interface WorkflowyItemProps {
   node: Node;
@@ -63,6 +65,7 @@ export const WorkflowyItem = ({
   const [dragPosition, setDragPosition] = useState<'before' | 'after' | 'child' | null>(null);
   const [showPersonaManager, setShowPersonaManager] = useState(false);
   const [showInlineRecorder, setShowInlineRecorder] = useState(false);
+  const [showPersonaSelector, setShowPersonaSelector] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   
   const isEditing = editingNodeId === node.id;
@@ -119,6 +122,24 @@ export const WorkflowyItem = ({
     storage.updateNode(node.id, { voiceNote: updatedVoiceNote });
     onNodesChange();
   };
+
+  const handleAddPersona = (personaId: string) => {
+    const currentPersonas = node.personas || [];
+    if (!currentPersonas.includes(personaId)) {
+      storage.updateNode(node.id, { personas: [...currentPersonas, personaId] });
+      onNodesChange();
+    }
+    setShowPersonaSelector(false);
+  };
+
+  const handleRemovePersona = (personaId: string) => {
+    const currentPersonas = node.personas || [];
+    storage.updateNode(node.id, { personas: currentPersonas.filter(id => id !== personaId) });
+    onNodesChange();
+  };
+
+  const availablePersonas = personaStorage.getPersonas();
+  const selectedPersonas = availablePersonas.filter(persona => node.personas?.includes(persona.id));
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (node.locked) return;
@@ -237,6 +258,38 @@ export const WorkflowyItem = ({
                 </PopoverTrigger>
                 <PopoverContent className="w-48 p-2" side="left" align="start">
                   <div className="space-y-1">
+                    <Popover open={showPersonaSelector} onOpenChange={setShowPersonaSelector}>
+                      <PopoverTrigger asChild>
+                        <button className="flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent rounded text-left">
+                          <User className="h-4 w-4 mr-2" />
+                          Add Persona
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-64 p-2" side="left" align="start">
+                        <div className="space-y-1 max-h-64 overflow-y-auto">
+                          {availablePersonas
+                            .filter(persona => !node.personas?.includes(persona.id))
+                            .map(persona => (
+                              <button
+                                key={persona.id}
+                                className="flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent rounded text-left"
+                                onClick={() => handleAddPersona(persona.id)}
+                              >
+                                <div 
+                                  className="w-3 h-3 rounded-full mr-2 flex-shrink-0"
+                                  style={{ backgroundColor: persona.color }}
+                                />
+                                {persona.name}
+                              </button>
+                            ))}
+                          {availablePersonas.filter(persona => !node.personas?.includes(persona.id)).length === 0 && (
+                            <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                              All personas already added
+                            </div>
+                          )}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
                     <button 
                       className="flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent rounded text-left"
                       onClick={() => onCopyTree(node.id)}
@@ -319,14 +372,39 @@ export const WorkflowyItem = ({
                   placeholder="Type something..."
                 />
               ) : (
-                <div 
-                  className={`text-sm cursor-text px-0 py-0 leading-6 flex items-center ${
-                    node.completed ? 'line-through text-muted-foreground' : ''
-                  }`}
-                  style={{ minHeight: '24px', height: '24px' }}
-                >
-                  {node.content || (
-                    <span className="text-muted-foreground italic">Click to edit</span>
+                <div className="space-y-1">
+                  <div 
+                    className={`text-sm cursor-text px-0 py-0 leading-6 flex items-center ${
+                      node.completed ? 'line-through text-muted-foreground' : ''
+                    }`}
+                    style={{ minHeight: '24px', height: '24px' }}
+                  >
+                    {node.content || (
+                      <span className="text-muted-foreground italic">Click to edit</span>
+                    )}
+                  </div>
+                  {selectedPersonas.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {selectedPersonas.map(persona => (
+                        <Badge
+                          key={persona.id}
+                          variant="secondary"
+                          className="text-xs h-5 px-2 py-0 flex items-center gap-1"
+                          style={{ backgroundColor: persona.color, color: 'white' }}
+                        >
+                          {persona.name}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemovePersona(persona.id);
+                            }}
+                            className="hover:bg-black/20 rounded-full p-0.5 ml-1"
+                          >
+                            <X className="h-2 w-2" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
                   )}
                 </div>
               )}

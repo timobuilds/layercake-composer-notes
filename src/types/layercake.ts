@@ -39,6 +39,7 @@ export interface Node {
   order?: number; // For ordering nodes within the same parent
   createdAt: string;
   voiceNote?: VoiceNote; // Voice note attached to this node
+  personas?: string[]; // Array of persona IDs attributed to this node
 }
 
 export interface NodeWithChildren extends Node {
