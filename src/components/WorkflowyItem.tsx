@@ -13,7 +13,10 @@ import {
 } from '@/components/ui/context-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { PersonaManager } from '@/components/PersonaManager/PersonaManager';
+import { VoiceNoteRecorder } from '@/components/VoiceNoteRecorder';
+import { VoiceNotePlayer } from '@/components/VoiceNotePlayer';
 import { storage } from '@/lib/storage';
+import { VoiceNote } from '@/types/layercake';
 
 interface WorkflowyItemProps {
   node: Node;
@@ -30,6 +33,7 @@ interface WorkflowyItemProps {
   onCopyTree: (nodeId: string) => void;
   onToggleLock: (nodeId: string) => void;
   onDrop: (draggedNodeId: string, targetNodeId: string, position: 'before' | 'after' | 'child') => void;
+  onNodesChange: () => void;
   editingNodeId: string | null;
   setEditingNodeId: (nodeId: string | null) => void;
 }
@@ -49,6 +53,7 @@ export const WorkflowyItem = ({
   onCopyTree,
   onToggleLock,
   onDrop,
+  onNodesChange,
   editingNodeId,
   setEditingNodeId
 }: WorkflowyItemProps) => {
@@ -93,6 +98,16 @@ export const WorkflowyItem = ({
       onEdit(node.id, editValue.trim());
     }
     setEditingNodeId(null);
+  };
+
+  const handleVoiceNoteSave = (voiceNote: VoiceNote) => {
+    storage.updateNode(node.id, { voiceNote });
+    onNodesChange();
+  };
+
+  const handleVoiceNoteUpdate = (updatedVoiceNote: VoiceNote) => {
+    storage.updateNode(node.id, { voiceNote: updatedVoiceNote });
+    onNodesChange();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -364,6 +379,7 @@ export const WorkflowyItem = ({
               onCopyTree={onCopyTree}
               onToggleLock={onToggleLock}
               onDrop={onDrop}
+              onNodesChange={onNodesChange}
               editingNodeId={editingNodeId}
               setEditingNodeId={setEditingNodeId}
             />

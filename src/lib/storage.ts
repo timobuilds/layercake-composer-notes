@@ -1,4 +1,4 @@
-import { Project, Node, ProjectVersion } from '@/types/layercake';
+import { Project, Node, ProjectVersion, VoiceNote } from '@/types/layercake';
 import { undoManager } from './undoManager';
 
 const PROJECTS_KEY = 'layercake-projects';

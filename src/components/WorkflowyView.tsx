@@ -289,6 +289,7 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
             onCopyTree={handleCopyTree}
             onToggleLock={handleToggleLock}
             onDrop={handleDrop}
+            onNodesChange={loadNodes}
             editingNodeId={editingNodeId}
             setEditingNodeId={setEditingNodeId}
           />
