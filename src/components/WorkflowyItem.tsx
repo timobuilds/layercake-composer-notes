@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Node } from '@/types/layercake';
-import { ChevronRight, ChevronDown, Circle, CheckCircle2, MoreHorizontal, Plus, Copy, Lock, Unlock, Trash2, Calendar, Clock, X } from 'lucide-react';
+import { ChevronRight, ChevronDown, Circle, CheckCircle2, MoreHorizontal, Plus, Copy, Lock, Unlock, Trash2, Calendar, Clock, X, Mic, Volume2 } from 'lucide-react';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -319,6 +319,36 @@ export const WorkflowyItem = ({
                     <span className="text-muted-foreground italic">Click to edit</span>
                   )}
                 </div>
+              )}
+            </div>
+
+            {/* Voice Note Controls */}
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              {/* Voice Note Recorder */}
+              <VoiceNoteRecorder
+                onSave={handleVoiceNoteSave}
+                trigger={
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0 hover:bg-accent"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Mic className="h-3 w-3" />
+                  </Button>
+                }
+              />
+              
+              {/* Voice Note Indicator */}
+              {node.voiceNote && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0 hover:bg-accent"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Volume2 className="h-3 w-3 text-primary" />
+                </Button>
               )}
             </div>
           </div>
