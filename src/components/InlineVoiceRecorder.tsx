@@ -10,12 +10,14 @@ import { RealTimeTranscript } from '@/components/RealTimeTranscript';
 interface InlineVoiceRecorderProps {
   onSave: (voiceNote: VoiceNote) => void;
   onCancel: () => void;
+  onSentenceComplete: (sentence: string) => void;
   isActive: boolean;
 }
 
 export const InlineVoiceRecorder: React.FC<InlineVoiceRecorderProps> = ({
   onSave,
   onCancel,
+  onSentenceComplete,
   isActive
 }) => {
   const {
@@ -64,7 +66,7 @@ export const InlineVoiceRecorder: React.FC<InlineVoiceRecorderProps> = ({
     <div className="w-full bg-background border rounded-lg p-4 mt-2 animate-fade-in">
       {/* Recording Header */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-medium">Record Voice Note</h3>
+        <h3 className="text-sm font-medium">Recording Voice Note</h3>
         <Button
           variant="ghost"
           size="sm"
@@ -128,6 +130,7 @@ export const InlineVoiceRecorder: React.FC<InlineVoiceRecorderProps> = ({
         <div className="mb-4">
           <RealTimeTranscript 
             isRecording={recordingState.isRecording}
+            onSentenceComplete={onSentenceComplete}
             className="w-full"
           />
         </div>

@@ -5,12 +5,14 @@ interface RealTimeTranscriptProps {
   isRecording: boolean;
   finalTranscript?: string;
   className?: string;
+  onSentenceComplete?: (sentence: string) => void;
 }
 
 export const RealTimeTranscript: React.FC<RealTimeTranscriptProps> = ({
   isRecording,
   finalTranscript,
-  className
+  className,
+  onSentenceComplete
 }) => {
   const [currentText, setCurrentText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -23,46 +25,47 @@ export const RealTimeTranscript: React.FC<RealTimeTranscriptProps> = ({
       return;
     }
 
-    const phrases = [
-      "This is a sample",
-      "voice note transcription",
-      "happening in real-time",
-      "as you speak into",
-      "the microphone",
-      "and the AI processes",
-      "your speech"
+    const sentences = [
+      "This is a sample sentence for testing.",
+      "Voice notes create nested nodes automatically.",
+      "Each sentence becomes a separate child node.",
+      "Real-time transcription makes note-taking seamless."
     ];
 
-    let currentPhraseIndex = 0;
+    let currentSentenceIndex = 0;
     let currentCharIndex = 0;
-    let accumulatedText = '';
+    let currentSentenceText = '';
 
     const typeText = () => {
-      if (currentPhraseIndex >= phrases.length) {
+      if (currentSentenceIndex >= sentences.length) {
         setIsTyping(false);
         return;
       }
 
       setIsTyping(true);
-      const currentPhrase = phrases[currentPhraseIndex];
+      const currentSentence = sentences[currentSentenceIndex];
       
-      if (currentCharIndex < currentPhrase.length) {
-        accumulatedText += currentPhrase[currentCharIndex];
-        setCurrentText(accumulatedText);
+      if (currentCharIndex < currentSentence.length) {
+        currentSentenceText += currentSentence[currentCharIndex];
+        setCurrentText(currentSentenceText);
         currentCharIndex++;
         
         // Vary typing speed for more natural feel
         const delay = Math.random() * 100 + 50;
         setTimeout(typeText, delay);
       } else {
-        // Finished current phrase, move to next
-        accumulatedText += ' ';
-        setCurrentText(accumulatedText);
-        currentPhraseIndex++;
-        currentCharIndex = 0;
+        // Finished current sentence, trigger node creation
+        if (onSentenceComplete) {
+          onSentenceComplete(currentSentence);
+        }
         
-        // Pause between phrases
-        setTimeout(typeText, 300 + Math.random() * 500);
+        currentSentenceIndex++;
+        currentCharIndex = 0;
+        currentSentenceText = '';
+        setCurrentText('');
+        
+        // Pause between sentences
+        setTimeout(typeText, 800 + Math.random() * 500);
       }
     };
 
