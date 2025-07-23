@@ -372,17 +372,7 @@ export const WorkflowyItem = ({
                   placeholder="Type something..."
                 />
               ) : (
-                <div className="space-y-1">
-                  <div 
-                    className={`text-sm cursor-text px-0 py-0 leading-6 flex items-center ${
-                      node.completed ? 'line-through text-muted-foreground' : ''
-                    }`}
-                    style={{ minHeight: '24px', height: '24px' }}
-                  >
-                    {node.content || (
-                      <span className="text-muted-foreground italic">Click to edit</span>
-                    )}
-                  </div>
+                <div className="flex items-center gap-2">
                   {selectedPersonas.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {selectedPersonas.map(persona => (
@@ -406,6 +396,16 @@ export const WorkflowyItem = ({
                       ))}
                     </div>
                   )}
+                  <div 
+                    className={`text-sm cursor-text px-0 py-0 leading-6 flex items-center ${
+                      node.completed ? 'line-through text-muted-foreground' : ''
+                    }`}
+                    style={{ minHeight: '24px', height: '24px' }}
+                  >
+                    {node.content || (
+                      <span className="text-muted-foreground italic">Click to edit</span>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
