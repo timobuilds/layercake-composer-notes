@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Node } from '@/types/layercake';
 import { storage, generateId } from '@/lib/storage';
+import { personaStorage } from '@/lib/personaStorage';
 import { Home, Plus } from 'lucide-react';
 import { WorkflowyItem } from '@/components/WorkflowyItem';
 
@@ -173,10 +174,36 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
   }, [loadNodes]);
 
   const handleCopyTree = useCallback((nodeId: string) => {
+    const collectAllPersonaIds = (node: Node): Set<string> => {
+      const personaIds = new Set<string>();
+      
+      // Add personas from current node
+      if (node.personas) {
+        node.personas.forEach(id => personaIds.add(id));
+      }
+      
+      // Add personas from all children recursively
+      const children = storage.getChildNodes(node.id);
+      children.forEach(child => {
+        const childPersonaIds = collectAllPersonaIds(child);
+        childPersonaIds.forEach(id => personaIds.add(id));
+      });
+      
+      return personaIds;
+    };
+
     const buildMarkdown = (node: Node, level: number = 0): string => {
       const indent = '  '.repeat(level);
       const prefix = level === 0 ? '# ' : '- ';
-      let markdown = `${indent}${prefix}${node.content || 'Untitled'}\n`;
+      let markdown = `${indent}${prefix}${node.content || 'Untitled'}`;
+      
+      // Add persona tags to the line if they exist
+      if (node.personas && node.personas.length > 0) {
+        const personaTags = node.personas.map(id => `[${id}]`).join(' ');
+        markdown += ` ${personaTags}`;
+      }
+      
+      markdown += '\n';
       
       const children = storage.getChildNodes(node.id);
       children.forEach(child => {
@@ -189,7 +216,31 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
     const allNodes = storage.getNodes();
     const node = allNodes.find(n => n.id === nodeId);
     if (node) {
-      const markdown = buildMarkdown(node);
+      // Get all unique persona IDs used in this tree
+      const allPersonaIds = collectAllPersonaIds(node);
+      
+      // Build markdown with persona definitions
+      let markdown = '';
+      
+      // Add persona definitions section if there are any personas
+      if (allPersonaIds.size > 0) {
+        const personas = personaStorage.getPersonas();
+        const usedPersonas = personas.filter(p => allPersonaIds.has(p.id));
+        
+        if (usedPersonas.length > 0) {
+          markdown += '## Persona Definitions\n\n';
+          usedPersonas.forEach(persona => {
+            markdown += `**${persona.name}** [${persona.id}]\n`;
+            markdown += `- Category: ${persona.category}\n`;
+            markdown += `- Instructions: ${persona.instructions}\n\n`;
+          });
+          markdown += '---\n\n';
+        }
+      }
+      
+      // Add the tree structure
+      markdown += buildMarkdown(node);
+      
       navigator.clipboard.writeText(markdown);
     }
   }, []);
