@@ -15,6 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { PersonaManager } from '@/components/PersonaManager/PersonaManager';
 import { VoiceNoteRecorder } from '@/components/VoiceNoteRecorder';
 import { VoiceNotePlayer } from '@/components/VoiceNotePlayer';
+import { InlineVoiceRecorder } from '@/components/InlineVoiceRecorder';
 import { storage } from '@/lib/storage';
 import { VoiceNote } from '@/types/layercake';
 
@@ -61,6 +62,7 @@ export const WorkflowyItem = ({
   const [isDragOver, setIsDragOver] = useState(false);
   const [dragPosition, setDragPosition] = useState<'before' | 'after' | 'child' | null>(null);
   const [showPersonaManager, setShowPersonaManager] = useState(false);
+  const [showInlineRecorder, setShowInlineRecorder] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   
   const isEditing = editingNodeId === node.id;
@@ -324,20 +326,18 @@ export const WorkflowyItem = ({
 
             {/* Voice Note Controls */}
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              {/* Voice Note Recorder */}
-              <VoiceNoteRecorder
-                onSave={handleVoiceNoteSave}
-                trigger={
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 p-0 hover:bg-accent"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Mic className="h-3 w-3" />
-                  </Button>
-                }
-              />
+              {/* Voice Note Trigger */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0 hover:bg-accent"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowInlineRecorder(!showInlineRecorder);
+                }}
+              >
+                <Mic className="h-3 w-3" />
+              </Button>
               
               {/* Voice Note Indicator */}
               {node.voiceNote && (
@@ -345,7 +345,10 @@ export const WorkflowyItem = ({
                   variant="ghost"
                   size="sm"
                   className="h-6 w-6 p-0 hover:bg-accent"
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // TODO: Add VoiceNotePlayer functionality
+                  }}
                 >
                   <Volume2 className="h-3 w-3 text-primary" />
                 </Button>
@@ -388,6 +391,13 @@ export const WorkflowyItem = ({
       <PersonaManager 
         isOpen={showPersonaManager} 
         onClose={() => setShowPersonaManager(false)} 
+      />
+
+      {/* Inline Voice Recorder */}
+      <InlineVoiceRecorder
+        isActive={showInlineRecorder}
+        onSave={handleVoiceNoteSave}
+        onCancel={() => setShowInlineRecorder(false)}
       />
 
       {/* Children */}
