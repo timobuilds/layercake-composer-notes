@@ -103,8 +103,27 @@ export const WorkflowyItem = ({
   };
 
   const handleVoiceNoteSave = (voiceNote: VoiceNote) => {
+    // Save the voice note to the current node
     storage.updateNode(node.id, { voiceNote });
+    
+    // Create child nodes from transcription if available
+    if (voiceNote.transcript && voiceNote.transcript.trim()) {
+      // Split transcription into sentences, removing empty ones
+      const sentences = voiceNote.transcript
+        .split(/[.!?]+/)
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+      
+      // Create child nodes for each sentence
+      sentences.forEach((sentence) => {
+        if (sentence.length > 0) {
+          onCreateChild(node.id, sentence);
+        }
+      });
+    }
+    
     onNodesChange();
+    setShowInlineRecorder(false);
   };
 
   const handleVoiceNoteUpdate = (updatedVoiceNote: VoiceNote) => {
