@@ -6,13 +6,28 @@ export interface TogetherAIConfig {
 export class TogetherAIService {
   private apiKey: string;
   private baseUrl: string;
+  private isDummyMode: boolean;
 
   constructor(config: TogetherAIConfig) {
     this.apiKey = config.apiKey;
     this.baseUrl = config.baseUrl || 'https://api.together.xyz/v1';
+    this.isDummyMode = config.apiKey === 'dummy-api-key-for-testing';
   }
 
   async transcribeAudio(audioBlob: Blob): Promise<string> {
+    // Return mock transcription for dummy mode
+    if (this.isDummyMode) {
+      await this.simulateDelay(1000, 3000); // Simulate API delay
+      const mockTranscripts = [
+        "This is a sample voice note transcription. The audio has been converted to text using AI.",
+        "I need to remember to buy groceries tomorrow: milk, bread, and eggs.",
+        "Meeting notes: Discussed the project timeline and decided to push the deadline by one week.",
+        "Great idea for the app: add voice notes to each node so users can record thoughts quickly.",
+        "Don't forget to call the dentist to schedule an appointment for next month."
+      ];
+      return mockTranscripts[Math.floor(Math.random() * mockTranscripts.length)];
+    }
+
     const formData = new FormData();
     formData.append('file', audioBlob, 'recording.webm');
     formData.append('model', 'whisper-large-v3');
@@ -34,6 +49,12 @@ export class TogetherAIService {
   }
 
   async generateAISummary(transcript: string): Promise<string> {
+    // Return mock summary for dummy mode
+    if (this.isDummyMode) {
+      await this.simulateDelay(800, 2000);
+      return `Summary: ${transcript.slice(0, 100)}${transcript.length > 100 ? '...' : ''} - Key points extracted and condensed for quick reference.`;
+    }
+
     const response = await fetch(`${this.baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
@@ -65,6 +86,20 @@ export class TogetherAIService {
   }
 
   async extractActionItems(transcript: string): Promise<string[]> {
+    // Return mock action items for dummy mode
+    if (this.isDummyMode) {
+      await this.simulateDelay(600, 1500);
+      const mockActions = [
+        "Schedule follow-up meeting",
+        "Send summary email to team",
+        "Review and update project timeline",
+        "Complete pending tasks by Friday"
+      ];
+      // Return 1-3 random action items
+      const numActions = Math.floor(Math.random() * 3) + 1;
+      return mockActions.slice(0, numActions);
+    }
+
     const response = await fetch(`${this.baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
@@ -104,6 +139,12 @@ export class TogetherAIService {
   }
 
   async expandToFullNote(transcript: string): Promise<string> {
+    // Return mock expanded note for dummy mode
+    if (this.isDummyMode) {
+      await this.simulateDelay(1000, 2500);
+      return `# Expanded Note\n\nBased on the voice recording, here's a structured expansion:\n\n## Main Points\n- ${transcript.slice(0, 50)}...\n\n## Additional Context\nThis note has been expanded with relevant details and structure to make it more comprehensive and actionable.\n\n## Next Steps\n- Review the content\n- Add any missing information\n- Share with relevant stakeholders`;
+    }
+
     const response = await fetch(`${this.baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
@@ -133,6 +174,11 @@ export class TogetherAIService {
     const result = await response.json();
     return result.choices[0]?.message?.content || transcript;
   }
+
+  private async simulateDelay(min: number, max: number): Promise<void> {
+    const delay = Math.floor(Math.random() * (max - min + 1)) + min;
+    return new Promise(resolve => setTimeout(resolve, delay));
+  }
 }
 
 // Singleton instance management
@@ -142,7 +188,7 @@ export const getTogetherAI = (): TogetherAIService | null => {
   return togetherAIInstance;
 };
 
-export const initializeTogetherAI = (apiKey: string): TogetherAIService => {
+export const initializeTogetherAI = (apiKey: string = 'dummy-api-key-for-testing'): TogetherAIService => {
   togetherAIInstance = new TogetherAIService({ apiKey });
   return togetherAIInstance;
 };
@@ -150,3 +196,8 @@ export const initializeTogetherAI = (apiKey: string): TogetherAIService => {
 export const isTogetherAIInitialized = (): boolean => {
   return togetherAIInstance !== null;
 };
+
+// Initialize with dummy key by default for development
+if (!togetherAIInstance) {
+  initializeTogetherAI();
+}
