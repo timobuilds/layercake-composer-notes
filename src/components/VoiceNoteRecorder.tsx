@@ -9,6 +9,8 @@ import { VoiceNote } from '@/types/layercake';
 import { formatDuration } from '@/services/voiceRecording';
 import { initializeTogetherAI } from '@/services/togetherAI';
 import { useToast } from '@/hooks/use-toast';
+import { VoiceWaveform } from '@/components/VoiceWaveform';
+import { RealTimeTranscript } from '@/components/RealTimeTranscript';
 
 interface VoiceNoteRecorderProps {
   onSave: (voiceNote: VoiceNote) => void;
@@ -109,11 +111,11 @@ export const VoiceNoteRecorder: React.FC<VoiceNoteRecorderProps> = ({
             <DialogTitle>Record Voice Note</DialogTitle>
           </DialogHeader>
           
-          <div className="flex flex-col items-center space-y-6 py-4">
+          <div className="flex flex-col space-y-6 py-4 w-full">
             {/* Recording Status */}
             <div className="text-center">
               {recordingState.isRecording && (
-                <div className="flex items-center space-x-2 text-red-500">
+                <div className="flex items-center justify-center space-x-2 text-red-500">
                   <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
                   <span>Recording...</span>
                 </div>
@@ -126,8 +128,21 @@ export const VoiceNoteRecorder: React.FC<VoiceNoteRecorderProps> = ({
               )}
             </div>
 
+            {/* Waveform Visualization */}
+            <VoiceWaveform 
+              isRecording={recordingState.isRecording}
+              audioStream={recordingState.mediaStream}
+              className="w-full"
+            />
+
+            {/* Real-time Transcription */}
+            <RealTimeTranscript 
+              isRecording={recordingState.isRecording}
+              className="w-full"
+            />
+
             {/* Recording Controls */}
-            <div className="flex space-x-4">
+            <div className="flex justify-center space-x-4">
               {!recordingState.isRecording ? (
                 <Button
                   onClick={handleStartRecording}
@@ -151,7 +166,7 @@ export const VoiceNoteRecorder: React.FC<VoiceNoteRecorderProps> = ({
 
             {/* Playback Controls (when recording exists) */}
             {recordingState.audioBlob && !recordingState.isRecording && (
-              <div className="flex space-x-2">
+              <div className="flex justify-center space-x-2">
                 <Button
                   onClick={playCurrentRecording}
                   variant="outline"

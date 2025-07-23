@@ -33,7 +33,13 @@ export const useVoiceRecording = (): UseVoiceRecordingReturn => {
     try {
       setError(null);
       await recorderRef.current.startRecording();
-      setRecordingState(prev => ({ ...prev, isRecording: true, duration: 0 }));
+      const mediaStream = recorderRef.current.getCurrentStream();
+      setRecordingState(prev => ({ 
+        ...prev, 
+        isRecording: true, 
+        duration: 0,
+        mediaStream 
+      }));
       
       // Start duration counter
       const startTime = Date.now();
@@ -59,6 +65,7 @@ export const useVoiceRecording = (): UseVoiceRecordingReturn => {
         isRecording: false,
         audioBlob,
         audioUrl: URL.createObjectURL(audioBlob),
+        mediaStream: undefined,
       }));
 
       const voiceNote: VoiceNote = {
@@ -102,6 +109,7 @@ export const useVoiceRecording = (): UseVoiceRecordingReturn => {
       isRecording: false,
       isPlaying: false,
       duration: 0,
+      mediaStream: undefined,
     });
     setError(null);
   }, []);

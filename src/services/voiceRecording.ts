@@ -4,6 +4,7 @@ export interface RecordingState {
   duration: number;
   audioBlob?: Blob;
   audioUrl?: string;
+  mediaStream?: MediaStream;
 }
 
 export class VoiceRecorder {
@@ -70,6 +71,10 @@ export class VoiceRecorder {
     }
     this.mediaRecorder = null;
     this.chunks = [];
+  }
+
+  getCurrentStream(): MediaStream | null {
+    return this.stream;
   }
 }
 
