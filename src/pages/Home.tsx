@@ -62,7 +62,15 @@ export const Home = () => {
 
         {/* Personas Section */}
         <div className="mb-6">
-          <h2 className="text-[10px] text-muted-foreground mb-2 uppercase tracking-wide">Personas</h2>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-[10px] text-muted-foreground uppercase tracking-wide">Personas</h2>
+            <button 
+              className="px-2 py-1 rounded text-xs font-normal border border-dashed border-muted-foreground/30 text-muted-foreground/70 hover:bg-muted/30 transition-colors"
+              onClick={() => setShowPersonaManager(true)}
+            >
+              + Add Persona
+            </button>
+          </div>
           <div className="flex flex-wrap gap-2">
             {personas.map((persona) => (
               <button
@@ -136,12 +144,6 @@ export const Home = () => {
                 </button>
               </button>
             ))}
-            <button 
-              className="px-2 py-1 rounded text-xs font-normal border border-dashed border-muted-foreground/30 text-muted-foreground/70 hover:bg-muted/30 transition-colors"
-              onClick={() => setShowPersonaManager(true)}
-            >
-              + Add Persona
-            </button>
           </div>
         </div>
 
