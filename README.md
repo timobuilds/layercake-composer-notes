@@ -1,73 +1,69 @@
-# Welcome to your Lovable project
+## Layercake Composer
 
-## Project info
+Local‑first, Workflowy‑style outliner for creative projects with personas, versioning, and voice notes.
 
-**URL**: https://lovable.dev/projects/4163578c-5036-4af6-85a4-c13f31b22ddc
+### Features
+- Projects with nested bullet nodes: indent/outdent, collapse, complete, drag-and-drop
+- Persona manager: templates, colors, editable instructions
+- Version Manager: side panel sheet with history, restore, and merge (destructive/non‑destructive)
+- Voice notes: record, attach to nodes, inline sentence capture to auto-create child nodes
+- Global search and command palette (Cmd/Ctrl+K) across projects and nodes
+- Pluggable persistence (default: browser `localStorage`)
 
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/4163578c-5036-4af6-85a4-c13f31b22ddc) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
+### Quick start
+```bash
 npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Open http://localhost:8080 and press Cmd/Ctrl+K to try the command palette.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Development
+- Build: `npm run build`
+- Lint: `npm run lint`
 
-**Use GitHub Codespaces**
+### Project structure (high level)
+```
+src/
+  components/
+    CommandMenu.tsx            # Cmd/Ctrl+K global search
+    VersionHistoryDialog.tsx   # Version Manager (right-side Sheet)
+    WorkflowyView.tsx          # Outliner view
+    WorkflowyItem.tsx          # Node row: edit/indent/drag/voice/personas
+    PersonaManager/            # Persona CRUD and templates
+  lib/
+    storage.ts                 # App data facade (projects/nodes/versions)
+    personaStorage.ts          # Persona persistence
+    search.ts                  # Global search across projects/nodes
+  data/
+    storageBackend.ts          # Pluggable storage backend (default: localStorage)
+  pages/                       # Home, ProjectView, NotFound
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Data model (simplified)
+- `Project { id, name, createdAt, currentVersion }`
+- `Node { id, projectId, parentId, content, order, completed, collapsed, locked, voiceNote, personas }`
+- `ProjectVersion { id, projectId, version, name, description?, createdAt, nodeSnapshot }`
 
-## What technologies are used for this project?
+### Import / Export
+- Export: in DevTools console run `storage.exportProject('<projectId>')` to get JSON.
+- Import: run `storage.importProject(jsonString)` to load a project (IDs preserved for that project).
 
-This project is built with:
+### Keyboard
+- Cmd/Ctrl+K: Command palette / search
+- Enter: New sibling
+- Tab / Shift+Tab: Indent / Outdent
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Swappable storage backend
+`storage` delegates to the active backend from `src/data/storageBackend.ts`.
+- Default: browser `localStorage`.
+- To plug another backend (e.g., IndexedDB/Supabase), implement `{ getItem, setItem }` and call `setStorageBackend()` at app start.
 
-## How can I deploy this project?
+### Stack
+React, Vite, TypeScript, Tailwind, shadcn-ui, React Router, TanStack Query, cmdk.
 
-Simply open [Lovable](https://lovable.dev/projects/4163578c-5036-4af6-85a4-c13f31b22ddc) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+### Roadmap
+- Sync + multi-device (CRDT/IndexedDB/Supabase)
+- Realtime collaboration (presence, cursors)
+- AI persona assistance (summaries, rewrite, tagging, vector search)
+- PWA/Electron packaging

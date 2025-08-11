@@ -1,5 +1,6 @@
 import { Project, Node, ProjectVersion, VoiceNote } from '@/types/layercake';
 import { undoManager } from './undoManager';
+import { getStorageBackend } from '@/data/storageBackend';
 
 const PROJECTS_KEY = 'layercake-projects';
 const NODES_KEY = 'layercake-nodes';
@@ -8,12 +9,12 @@ const VERSIONS_KEY = 'layercake-versions';
 export const storage = {
   // Projects
   getProjects(): Project[] {
-    const stored = localStorage.getItem(PROJECTS_KEY);
+    const stored = getStorageBackend().getItem(PROJECTS_KEY);
     return stored ? JSON.parse(stored) : [];
   },
 
   saveProjects(projects: Project[]): void {
-    localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
+    getStorageBackend().setItem(PROJECTS_KEY, JSON.stringify(projects));
   },
 
   addProject(project: Project): void {
@@ -31,12 +32,12 @@ export const storage = {
 
   // Nodes
   getNodes(): Node[] {
-    const stored = localStorage.getItem(NODES_KEY);
+    const stored = getStorageBackend().getItem(NODES_KEY);
     return stored ? JSON.parse(stored) : [];
   },
 
   saveNodes(nodes: Node[]): void {
-    localStorage.setItem(NODES_KEY, JSON.stringify(nodes));
+    getStorageBackend().setItem(NODES_KEY, JSON.stringify(nodes));
   },
 
   addNode(node: Node): void {
@@ -229,12 +230,12 @@ export const storage = {
 
   // Versions
   getVersions(): ProjectVersion[] {
-    const stored = localStorage.getItem(VERSIONS_KEY);
+    const stored = getStorageBackend().getItem(VERSIONS_KEY);
     return stored ? JSON.parse(stored) : [];
   },
 
   saveVersions(versions: ProjectVersion[]): void {
-    localStorage.setItem(VERSIONS_KEY, JSON.stringify(versions));
+    getStorageBackend().setItem(VERSIONS_KEY, JSON.stringify(versions));
   },
 
   createVersion(projectId: string, version: string, name: string, nodes: Node[], description?: string): ProjectVersion {
@@ -335,6 +336,37 @@ export const storage = {
     );
 
     return mergedVersion;
+  },
+
+  // Import/Export
+  exportProject(projectId: string): string {
+    const project = this.getProject(projectId);
+    if (!project) {
+      throw new Error('Project not found');
+    }
+    const nodes = this.getProjectNodes(projectId);
+    const versions = this.getProjectVersions(projectId);
+    return JSON.stringify({ project, nodes, versions }, null, 2);
+  },
+
+  importProject(json: string): { projectId: string } {
+    const parsed = JSON.parse(json) as { project: Project; nodes: Node[]; versions: ProjectVersion[] };
+    const { project, nodes, versions } = parsed;
+
+    // Projects
+    const allProjects = this.getProjects().filter((p) => p.id !== project.id);
+    allProjects.push(project);
+    this.saveProjects(allProjects);
+
+    // Nodes
+    const allNodes = this.getNodes().filter((n) => n.projectId !== project.id);
+    this.saveNodes([...allNodes, ...nodes]);
+
+    // Versions
+    const allVersions = this.getVersions().filter((v) => v.projectId !== project.id);
+    this.saveVersions([...allVersions, ...versions]);
+
+    return { projectId: project.id };
   }
 };
 

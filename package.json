@@ -1,5 +1,6 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "layercake-composer",
+  "description": "Local-first Workflowy-style composer with personas, versioning, and voice notes",
   "private": true,
   "version": "0.0.0",
   "type": "module",

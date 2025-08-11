@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -104,17 +104,18 @@ export const VersionHistoryDialog = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => {
+    <Sheet open={isOpen} onOpenChange={(open) => {
       setIsOpen(open);
       if (open) loadVersions();
     }}>
-      <DialogContent className="sm:max-w-[800px] max-h-[700px]">
-        <DialogHeader>
-          <DialogTitle className="text-base">Version Manager</DialogTitle>
-          <DialogDescription className="text-xs">
-            Create new versions, view history, and merge previous versions of your project.
-          </DialogDescription>
-        </DialogHeader>
+      <SheetContent side="right" className="w-[760px] max-w-[95vw] p-0">
+        <div className="p-6">
+          <SheetHeader>
+            <SheetTitle className="text-base">Version Manager</SheetTitle>
+            <SheetDescription className="text-xs">
+              Create new versions, view history, and merge previous versions of your project.
+            </SheetDescription>
+          </SheetHeader>
         
         <Tabs defaultValue="history" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
@@ -305,7 +306,8 @@ export const VersionHistoryDialog = ({
         </div>
           </TabsContent>
         </Tabs>
-      </DialogContent>
-    </Dialog>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 };

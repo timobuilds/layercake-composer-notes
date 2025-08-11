@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Home } from "./pages/Home";
 import { ProjectView } from "./pages/ProjectView";
 import NotFound from "./pages/NotFound";
+import { CommandMenu } from "@/components/CommandMenu";
 
 const queryClient = new QueryClient();
 
@@ -16,6 +17,7 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <Sonner />
+          <CommandMenu />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/project/:projectId" element={<ProjectView />} />
