@@ -1,6 +1,22 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@layer utilities {
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(2px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in {
+    animation: fade-in 200ms ease-out;
+  }
+  @keyframes fade-out {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-2px); }
+  }
+  .animate-fade-out {
+    animation: fade-out 180ms ease-in forwards;
+  }
+}
 
 /* Layercake Design System - Hierarchical note-taking with beautiful gradients */
 
@@ -44,6 +60,7 @@
     --ring: 215 100% 60%;
 
     --radius: 4px;
+    --min-tap: 44px;
 
     /* Minimal shadows */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -106,7 +123,7 @@
   body {
     @apply bg-background text-foreground text-base;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1.4;
   }
 
@@ -170,5 +187,21 @@
 
   .workflowy-item .workflowy-children {
     @apply border-l border-border/30 ml-2 pl-4;
+  }
+
+  /* Ensure visible focus for links and form controls */
+  :where(a, button, [role="button"], input, select, textarea):focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+}
+
+/* Utilities and a11y tweaks */
+.touch-target { min-height: var(--min-tap); min-width: var(--min-tap); }
+
+@media (prefers-reduced-motion: reduce) {
+  *:not(.allow-motion) {
+    animation: none !important;
+    transition: none !important;
   }
 }

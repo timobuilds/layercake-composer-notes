@@ -66,6 +66,9 @@ export const WorkflowyItem = ({
   const [showPersonaManager, setShowPersonaManager] = useState(false);
   const [showInlineRecorder, setShowInlineRecorder] = useState(false);
   const [showPersonaSelector, setShowPersonaSelector] = useState(false);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [touchDeltaX, setTouchDeltaX] = useState<number>(0);
+  const [revealActions, setRevealActions] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
   
   const isEditing = editingNodeId === node.id;
@@ -220,7 +223,7 @@ export const WorkflowyItem = ({
   };
 
   return (
-    <div className="workflowy-item relative">
+    <div className="workflowy-item relative transition-colors duration-200" data-node-id={node.id}>
       {/* Drop indicators */}
       {isDragOver && dragPosition === 'before' && (
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-blue-500 z-10 -mt-0.5" />
@@ -236,12 +239,53 @@ export const WorkflowyItem = ({
               isDragOver && dragPosition === 'child' ? 'bg-primary/10 border-l-4 border-primary' : ''
             }`}
             onClick={handleClick}
-            style={{ paddingLeft: `${indentLevel + 8}px` }}
+            style={{
+              paddingLeft: `${indentLevel + 8}px`,
+              transform: `translateX(${revealActions ? -72 : Math.min(Math.max(touchDeltaX, -72), 72)}px)`,
+              transition: touchStartX == null ? 'transform 150ms ease-out' : 'none',
+            }}
             draggable={!isEditing && !node.locked}
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
+            onTouchStart={(e) => {
+              const x = e.touches[0]?.clientX ?? 0;
+              setTouchStartX(x);
+              setTouchDeltaX(0);
+            }}
+            onTouchMove={(e) => {
+              if (touchStartX == null) return;
+              const x = e.touches[0]?.clientX ?? 0;
+              const dx = x - touchStartX;
+              setTouchDeltaX(dx);
+            }}
+            onTouchEnd={() => {
+              if (touchStartX == null) return;
+              const threshold = 80;
+              if (touchDeltaX > threshold) {
+                onToggleComplete(node.id);
+              } else if (touchDeltaX < -threshold) {
+                setRevealActions(true);
+              } else if (Math.abs(touchDeltaX) < 12) {
+                // treat as tap
+                handleClick(new MouseEvent('click') as any);
+              }
+              setTouchStartX(null);
+              setTouchDeltaX(0);
+            }}
+            onTouchStart={(e) => {
+              // Long-press hint for mobile drag (basic)
+              const target = e.currentTarget as HTMLElement;
+              (target as any)._lpTimer = setTimeout(() => {
+                if (!node.locked) target.setAttribute('draggable', 'true');
+              }, 350);
+            }}
+            onTouchEnd={(e) => {
+              const target = e.currentTarget as any;
+              if (target._lpTimer) clearTimeout(target._lpTimer);
+              target.removeAttribute('draggable');
+            }}
           >
             {/* Menu button */}
             <div className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 w-6">
@@ -347,7 +391,7 @@ export const WorkflowyItem = ({
               
               <button
                 onClick={handleBulletClick}
-                className="p-0 h-4 w-4 hover:bg-muted rounded flex items-center justify-center"
+                className="p-0 h-4 w-4 hover:bg-muted rounded flex items-center justify-center active:scale-[0.96] transition-transform"
               >
                 {node.completed ? (
                   <CheckCircle2 className="h-3 w-3 text-green-600" />
@@ -440,6 +484,71 @@ export const WorkflowyItem = ({
                 </Button>
               )}
             </div>
+          </div>
+          {/* Swipe-revealed actions */}
+          <div className="pointer-events-none">
+            {revealActions && (
+              <div className="absolute right-1 top-1/2 -translate-y-1/2 flex gap-1 pointer-events-auto">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-6 px-2 text-xs"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setRevealActions(false);
+                    setEditingNodeId(node.id);
+                  }}
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-6 px-2 text-xs"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleLock(node.id);
+                  }}
+                >
+                  {node.locked ? 'Unlock' : 'Lock'}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-6 px-2 text-xs"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onCopyTree(node.id);
+                    setRevealActions(false);
+                  }}
+                >
+                  Copy
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="h-6 px-2 text-xs"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(node.id);
+                    setRevealActions(false);
+                  }}
+                >
+                  Delete
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-2 text-xs"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setRevealActions(false);
+                  }}
+                >
+                  Close
+                </Button>
+              </div>
+            )}
           </div>
         </ContextMenuTrigger>
         

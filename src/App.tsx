@@ -7,6 +7,8 @@ import { Home } from "./pages/Home";
 import { ProjectView } from "./pages/ProjectView";
 import NotFound from "./pages/NotFound";
 import { CommandMenu } from "@/components/CommandMenu";
+import { ShortcutHelp } from "@/components/ShortcutHelp";
+import Settings from "@/pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -18,9 +20,11 @@ function App() {
           <Toaster />
           <Sonner />
           <CommandMenu />
+          <ShortcutHelp />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/project/:projectId" element={<ProjectView />} />
+            <Route path="/settings" element={<Settings />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

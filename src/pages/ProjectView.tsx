@@ -8,7 +8,9 @@ import { WorkflowyView } from '@/components/WorkflowyView';
 import { VersionHistoryDialog } from '@/components/VersionHistoryDialog';
 import { storage, generateId } from '@/lib/storage';
 import { Project, Node } from '@/types/layercake';
-import { ArrowLeft, Plus, FileText } from 'lucide-react';
+import { ArrowLeft, Plus, FileText, History } from 'lucide-react';
+import { SyncStatus } from '@/components/SyncStatus';
+import { openShortcutHelp } from '@/components/ShortcutHelp';
 
 export const ProjectView = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -99,16 +101,30 @@ export const ProjectView = () => {
                 {nodes.length} nodes
               </span>
             </div>
-            
-             <div className="flex gap-2">
-                <VersionHistoryDialog 
-                  projectId={projectId!} 
-                  onVersionRestored={loadNodes}
-                  onVersionCreated={handleVersionCreated}
-                  isOpen={isVersionDialogOpen}
-                  onOpenChange={setIsVersionDialogOpen}
-                />
-              </div>
+            <div className="flex items-center gap-2">
+              <SyncStatus />
+              <button
+                onClick={() => openShortcutHelp()}
+                className="text-xs px-2 py-1 border rounded hover:bg-muted transition-colors"
+                title="Keyboard shortcuts (Cmd/Ctrl+/)"
+              >
+                Shortcuts
+              </button>
+              <button
+                onClick={() => setIsVersionDialogOpen(true)}
+                className="text-xs px-2 py-1 border rounded hover:bg-muted transition-colors flex items-center gap-1"
+                title="Open Version Manager"
+              >
+                <History className="h-3 w-3" /> Version Manager
+              </button>
+              <VersionHistoryDialog 
+                projectId={projectId!} 
+                onVersionRestored={loadNodes}
+                onVersionCreated={handleVersionCreated}
+                isOpen={isVersionDialogOpen}
+                onOpenChange={setIsVersionDialogOpen}
+              />
+            </div>
           </div>
         </div>
 

@@ -17,8 +17,10 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
   const [breadcrumbs, setBreadcrumbs] = useState<Node[]>([]);
   const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null);
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const loadNodes = useCallback(() => {
+    setIsLoading(true);
     try {
       if (focusedNodeId) {
         const focusedChildren = storage.getChildNodes(focusedNodeId);
@@ -49,6 +51,8 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
       setNodes([]);
       setBreadcrumbs([]);
     }
+    // allow skeleton to render very briefly
+    setTimeout(() => setIsLoading(false), 120);
   }, [projectId, focusedNodeId]);
 
   useEffect(() => {
@@ -62,6 +66,12 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
   const handleEdit = useCallback((nodeId: string, content: string) => {
     storage.updateNode(nodeId, { content });
     loadNodes();
+    // Briefly highlight edited node for perceived feedback
+    const el = document.querySelector(`[data-node-id="${nodeId}"]`);
+    if (el) {
+      el.classList.add('bg-yellow-50');
+      setTimeout(() => el.classList.remove('bg-yellow-50'), 200);
+    }
   }, [loadNodes]);
 
   const handleToggleComplete = useCallback((nodeId: string) => {
@@ -92,6 +102,13 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
     };
     storage.addNode(newNode);
     loadNodes();
+    requestAnimationFrame(() => {
+      const el = document.querySelector(`[data-node-id="${newNode.id}"]`);
+      if (el) {
+        el.classList.add('animate-fade-in');
+        setTimeout(() => el.classList.remove('animate-fade-in'), 250);
+      }
+    });
     
     // Set the new node to editing mode
     setTimeout(() => {
@@ -112,6 +129,13 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
       };
       storage.addNode(newNode);
       loadNodes();
+      requestAnimationFrame(() => {
+        const el = document.querySelector(`[data-node-id="${newNode.id}"]`);
+        if (el) {
+          el.classList.add('animate-fade-in');
+          setTimeout(() => el.classList.remove('animate-fade-in'), 250);
+        }
+      });
       
       // Set the new node to editing mode
       setTimeout(() => {
@@ -125,7 +149,7 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
       storage.getChildNodes(focusedNodeId).filter(n => n.projectId === projectId) :
       storage.getRootNodes(projectId);
     const nodeIndex = currentNodes.findIndex(n => n.id === nodeId);
-    
+
     // Find focus target before deletion
     let focusTargetId: string | null = null;
     if (nodeIndex > 0) {
@@ -133,16 +157,19 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
     } else if (nodeIndex === 0 && currentNodes.length > 1) {
       focusTargetId = currentNodes[1].id;
     }
-    
-    storage.deleteNode(nodeId);
-    loadNodes();
-    
-    // Focus on target node
-    if (focusTargetId) {
-      setTimeout(() => {
-        setEditingNodeId(focusTargetId);
-      }, 50);
+
+    // Animate fade-out before removing
+    const el = document.querySelector(`[data-node-id="${nodeId}"]`);
+    if (el) {
+      el.classList.add('animate-fade-out');
     }
+    setTimeout(() => {
+      storage.deleteNode(nodeId);
+      loadNodes();
+      if (focusTargetId) {
+        setTimeout(() => setEditingNodeId(focusTargetId!), 50);
+      }
+    }, 180);
   }, [projectId, focusedNodeId, loadNodes]);
 
   const handleIndent = useCallback((nodeId: string) => {
@@ -270,6 +297,13 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
         storage.updateNode(draggedNodeId, { parentId: targetNodeId });
       }
       loadNodes();
+      requestAnimationFrame(() => {
+        const el = document.querySelector(`[data-node-id="${draggedNodeId}"]`);
+        if (el) {
+          el.classList.add('bg-blue-50');
+          setTimeout(() => el.classList.remove('bg-blue-50'), 250);
+        }
+      });
     } catch (error) {
       console.error('Error during drag and drop:', error);
     }
@@ -323,7 +357,13 @@ export const WorkflowyView = ({ projectId, onNodesChange }: WorkflowyViewProps) 
 
       {/* Items */}
       <div className="workflowy-items space-y-1">
-        {nodes.map((node) => (
+        {isLoading ? (
+          <div className="space-y-1">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-7 bg-muted/40 rounded animate-pulse" />
+            ))}
+          </div>
+        ) : nodes.map((node) => (
           <WorkflowyItem
             key={node.id}
             node={node}

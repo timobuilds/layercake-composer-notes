@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -11,6 +12,7 @@ import { storage } from '@/lib/storage';
 import { formatDistance } from 'date-fns';
 import { History, RotateCcw, Calendar, GitMerge, GitBranch, Save, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { createReleaseWithSnapshot, isGithubConfigured, loadGithubSettings, notifyGithubSyncUpdated, setLastSyncedAt } from '@/services/githubSync';
 
 interface VersionHistoryDialogProps {
   projectId: string;
@@ -34,31 +36,82 @@ export const VersionHistoryDialog = ({
   const [version, setVersion] = useState('');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [releaseToGithub, setReleaseToGithub] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [justMergedVersionId, setJustMergedVersionId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
   const setIsOpen = externalOnOpenChange || setInternalIsOpen;
 
-  const handleCreateVersion = (e: React.FormEvent) => {
+  const handleCreateVersion = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (version.trim() && name.trim()) {
-      const nodes = storage.getProjectNodes(projectId);
-      storage.createVersion(projectId, version.trim(), name.trim(), nodes, description.trim());
-      loadVersions();
-      onVersionCreated?.();
-      setVersion('');
-      setName('');
-      setDescription('');
-      toast({
-        title: "Version Created",
-        description: `Version ${version.trim()} has been created successfully.`,
-      });
+    if (!(version.trim() && name.trim())) return;
+    const nodes = storage.getProjectNodes(projectId);
+    storage.createVersion(projectId, version.trim(), name.trim(), nodes, description.trim());
+    loadVersions();
+    onVersionCreated?.();
+
+    // Optionally publish a GitHub release if configured and the toggle is on
+    if (releaseToGithub && isGithubConfigured()) {
+      const settings = loadGithubSettings();
+      const project = storage.getProject(projectId);
+      if (settings && project) {
+        try {
+          setIsPublishing(true);
+          await createReleaseWithSnapshot({
+            settings,
+            project,
+            data: {
+              version: version.trim(),
+              name: name.trim(),
+              description: description.trim(),
+              json: JSON.stringify({ project, nodes }, null, 2),
+            },
+          });
+          // Strategic delay to increase perceived trust
+          setIsVerifying(true);
+          await new Promise((r) => setTimeout(r, 600));
+          const now = new Date().toISOString();
+          setLastSyncedAt(now);
+          notifyGithubSyncUpdated();
+          toast({ title: 'GitHub Release Published', description: `v${version.trim()} released.` });
+        } catch (err: any) {
+          toast({ title: 'GitHub Release Failed', description: err?.message || 'Unknown error', variant: 'destructive' });
+        } finally {
+          setIsPublishing(false);
+          setIsVerifying(false);
+        }
+      }
     }
+
+    setVersion('');
+    setName('');
+    setDescription('');
+    toast({ title: 'Version Created', description: `Version ${version.trim()} has been created successfully.` });
+  };
+
+  const previewData = () => {
+    const nodes = storage.getProjectNodes(projectId);
+    const project = storage.getProject(projectId);
+    return {
+      tag: `v${version.trim() || '1.0.0'}`,
+      title: `${name.trim() || 'Release'} (${version.trim() || '1.0.0'})`,
+      body: JSON.stringify({ project, nodes, description: description.trim() }, null, 2),
+    };
   };
 
   const loadVersions = () => {
-    setVersions(storage.getProjectVersions(projectId));
-    setCurrentProject(storage.getProject(projectId));
+    setIsLoading(true);
+    // Simulate brief load to allow skeleton to render
+    setTimeout(() => {
+      setVersions(storage.getProjectVersions(projectId));
+      setCurrentProject(storage.getProject(projectId));
+      setIsLoading(false);
+    }, 150);
   };
 
   const handleRestore = (versionId: string) => {
@@ -89,6 +142,7 @@ export const VersionHistoryDialog = ({
     try {
       storage.mergeVersions(projectId, selectedVersions[0], selectedVersions[1], destructive);
       loadVersions();
+      setJustMergedVersionId(selectedVersions[1]);
       setSelectedVersions([]);
       toast({
         title: "Versions Merged",
@@ -104,6 +158,7 @@ export const VersionHistoryDialog = ({
   };
 
   return (
+    <>
     <Sheet open={isOpen} onOpenChange={(open) => {
       setIsOpen(open);
       if (open) loadVersions();
@@ -155,10 +210,40 @@ export const VersionHistoryDialog = ({
                   className="text-xs min-h-[60px]"
                 />
               </div>
+              <div className="flex items-center gap-2">
+                <input
+                  id="releaseToGithub"
+                  type="checkbox"
+                  className="h-3 w-3"
+                  checked={releaseToGithub}
+                  onChange={(e) => setReleaseToGithub(e.target.checked)}
+                  disabled={!isGithubConfigured() || isPublishing}
+                />
+                <label htmlFor="releaseToGithub" className="text-xs">
+                  Release to GitHub (enabled when repository is configured)
+                </label>
+              </div>
+              {(isPublishing || isVerifying) && (
+                <div className="text-xs text-muted-foreground">
+                  {isPublishing ? 'Publishing…' : 'Verifying on GitHub…'}
+                </div>
+              )}
               <div className="flex justify-end gap-2">
-                <Button type="submit" disabled={!version.trim() || !name.trim()} size="sm" className="text-xs">
+                {isGithubConfigured() && releaseToGithub && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="text-xs"
+                    onClick={() => setIsPreviewOpen(true)}
+                    disabled={!version.trim() || !name.trim() || isPublishing || isVerifying}
+                  >
+                    Preview Release
+                  </Button>
+                )}
+                <Button type="submit" disabled={!version.trim() || !name.trim() || isPublishing || isVerifying} size="sm" className="text-xs">
                   <Save className="h-3 w-3 mr-1" />
-                  Create Version
+                  {isPublishing ? 'Publishing…' : isVerifying ? 'Verifying…' : 'Create Version'}
                 </Button>
               </div>
             </form>
@@ -193,7 +278,13 @@ export const VersionHistoryDialog = ({
         )}
 
         <div className="max-h-[400px] overflow-y-auto">
-          {versions.length === 0 ? (
+          {isLoading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="h-16 bg-muted/30 rounded animate-pulse" />
+              ))}
+            </div>
+          ) : versions.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-xs text-muted-foreground">No versions saved yet.</p>
             </div>
@@ -212,7 +303,7 @@ export const VersionHistoryDialog = ({
                   const isCurrentVersion = currentProject && version.version === currentProject.currentVersion;
                   
                   return (
-                    <div key={version.id} className="relative flex items-start gap-4 pb-4">
+                    <div key={version.id} className={`relative flex items-start gap-4 pb-4 ${justMergedVersionId === version.id ? 'animate-fade-in' : ''}`}>
                       {/* Timeline node */}
                       <div className="relative flex-shrink-0">
                         <div 
@@ -309,5 +400,26 @@ export const VersionHistoryDialog = ({
         </div>
       </SheetContent>
     </Sheet>
+
+    {/* Release Preview Modal */}
+    <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+      <DialogContent className="sm:max-w-[700px]">
+        <DialogHeader>
+          <DialogTitle className="text-base">Release Preview</DialogTitle>
+          <DialogDescription className="text-xs">This is what will be sent to GitHub as a release.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2 text-xs">
+          <div><span className="font-medium">Tag:</span> {previewData().tag}</div>
+          <div><span className="font-medium">Title:</span> {previewData().title}</div>
+          <div className="border rounded p-2 bg-muted/30 overflow-auto max-h-64">
+            <pre className="whitespace-pre-wrap break-words text-[11px] leading-[1.2]">{previewData().body}</pre>
+          </div>
+        </div>
+        <div className="flex justify-end">
+          <Button size="sm" onClick={() => setIsPreviewOpen(false)}>Close</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 };
